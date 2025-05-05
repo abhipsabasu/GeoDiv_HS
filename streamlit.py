@@ -17,6 +17,7 @@ response_bg = requests.get(GITHUB + 'df_bgr_sampled_updated_withnewpaths.csv')
 df_bg = pd.read_csv(StringIO(response_obj.text))
 
 df = pd.merge(df_obj, df_bg, on=['concept_id', 'new_path'], how='inner')
+print(df.loc[0, "question_x"], df.loc[0, "question_y"])
 df["attribute_values_x"] = df["attribute_values_x"].apply(ast.literal_eval)
 df["attribute_values_y"] = df["attribute_values_y"].apply(ast.literal_eval)
 
@@ -28,7 +29,6 @@ for idx, row in df.iterrows():
                                     "options": row['attribute_values_x']},
                                   {"question": row['question_y'], 
                                     "options": row['attribute_values_y']}]
-    print(QUESTIONS[row['new_path']])
 # --- UI HEADER ---
 st.title("A Survey on Image-based Question Answering")
 st.write("""You will be shown a number of images, and each such image will 
