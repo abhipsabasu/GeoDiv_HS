@@ -96,4 +96,4 @@ with st.form("survey_form"):
     if submitted:
         st.session_state.responses.append(response)
         st.session_state.index += 1
-        st.experimental_rerun()
+        st.rerun()
