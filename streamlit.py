@@ -8,7 +8,7 @@ import ast
 import os
 
 # --- CONFIG ---
-GITHUB = "https://raw.githubusercontent.com/abhipsa/GeoDiv_HS/main/"
+GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
 
 response_obj = requests.get(GITHUB + 'sampled_object_attributes_withnewpaths.csv')
 df_obj = pd.read_csv(StringIO(response_obj.text))
