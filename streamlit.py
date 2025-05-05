@@ -17,7 +17,7 @@ response_bg = requests.get(GITHUB + 'df_bgr_sampled_updated_withnewpaths.csv')
 df_bg = pd.read_csv(StringIO(response_obj.text))
 
 df = pd.merge(df_obj, df_bg, on=['concept_id', 'new_path'], how='inner')
-print('________', df.loc[0, "question_x"], df.loc[0, "question_y"])
+print('_________', df.loc[0, "question_x"], df.loc[0, "question_y"])
 df["attribute_values_x"] = df["attribute_values_x"].apply(ast.literal_eval)
 df["attribute_values_y"] = df["attribute_values_y"].apply(ast.literal_eval)
 
