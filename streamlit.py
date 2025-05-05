@@ -26,7 +26,7 @@ for idx, row in df.iterrows():
     QUESTIONS[row['new_path']] = [{"question": row['question_x'], 
                                     "options": row['attribute_values_x']}
                                  ,{"question": row['question_y'], 
-                                    "options": row['attribute_values_y']]
+                                    "options": row['attribute_values_y']}]
 # --- UI HEADER ---
 st.title("A Survey on Image-based Question Answering")
 st.write("""You will be shown a number of images, and each such image will 
