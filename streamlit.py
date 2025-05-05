@@ -13,7 +13,7 @@ response_obj = requests.get(GITHUB + 'sampled_object_attributes_withnewpaths.csv
 df_obj = pd.read_csv(StringIO(response_obj.text))
 
 response_bg = requests.get(GITHUB + 'df_bgr_sampled_updated_withnewpaths.csv')
-df_bg = od.read_csv(StringIO(response_obj.text))
+df_bg = pd.read_csv(StringIO(response_obj.text))
 
 df = pd.merge(df_obj, df_bg, on=['concept_id', 'new_path'], how='inner')
 df["attribute_values_x"] = df["attribute_values_x"].apply(ast.literal_eval)
