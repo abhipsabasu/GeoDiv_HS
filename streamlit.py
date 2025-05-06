@@ -117,13 +117,13 @@ with st.form("all_images_form"):
         response = {"image": img_name}
 
         # Layout with 2 columns
-        if len(questions) == 2:
-            col1, col2 = st.columns(2)
-        else:
-            col1 = col2 = st
+        # if len(questions) == 4:
+        col1a, col1b = st.columns(2)
+        # else:
+            # col1 = col2 = st
 
         # Question 1
-        with col1:
+        with col1a:
             q1 = questions[0]
             ans1 = st.multiselect(q1["question"], q1["options"], key=f"q1_{idx}")
             response[q1["question"]] = ans1
@@ -135,7 +135,7 @@ with st.form("all_images_form"):
             #     response[f"{q1['question']} - Other"] = other1
 
         # Question 2
-        with col2:
+        with col1b:
             q2 = questions[1]
             ans2 = st.multiselect(q2["question"], q2["options"], key=f"q2_{idx}")
             response[q2["question"]] = ans2
@@ -145,7 +145,23 @@ with st.form("all_images_form"):
             # if "None of the above" in ans2:
             #     other2 = st.text_input("Please describe (Q2):", key=f"other2_{idx}")
             #     response[f"{q2['question']} - Other"] = other2
-
+        col2a, col2b = st.columns(2)
+        with col2a:
+            q3 = {"question": "Rate your confidence in answering the question.",
+                  "options": ["High confidence", "Medium confidence", "Low confidence"]}
+            ans3 = st.radio(q3["question"], q3["options"], key=f"q3_{idx}")
+            response[q3["question"]] = ans3
+            if not ans3:
+                incomplete = True
+                missing_questions.append(f"Image {idx + 1} - Q3")
+        with col4:
+            q4 = {"question": "Rate the image on its realism, on a scale of 1 to 5, where 1 means not realistic at all, 5 means highly realistic.",
+                  "options": ["1", "2", "3", "4", "5"]}
+            ans4 = st.radio(q4["question"], q4["options"], key=f"q4_{idx}")
+            response[q4["question"]] = ans4
+            if not ans4:
+                incomplete = True
+                missing_questions.append(f"Image {idx + 1} - Q4")
         all_responses.append(response)
         st.markdown("---")
 
