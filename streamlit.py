@@ -55,9 +55,9 @@ IMAGE_LIST =  list(df['new_path'])# filenames in the GitHub repo
 QUESTIONS = {}
 
 for idx, row in df.iterrows():
-    QUESTIONS[row['new_path']] = [{"question": row['question_x'], 
+    QUESTIONS[row['new_path']] = [{"question": '**'+row['question_x']+'**', 
                                     "options": row['attribute_values_x']},
-                                  {"question": row['question_y'], 
+                                  {"question": '**'+row['question_y']+'**', 
                                     "options": row['attribute_values_y']}]
 # --- UI HEADER ---
 st.title("A Survey on Image-based Question Answering")
@@ -147,7 +147,7 @@ with st.form("all_images_form"):
             #     response[f"{q2['question']} - Other"] = other2
         col2a, col2b = st.columns(2)
         with col2a:
-            q3 = {"question": "Rate your confidence in answering the question.",
+            q3 = {"question": "**Rate your confidence in answering the question.**",
                   "options": ["High confidence", "Medium confidence", "Low confidence"]}
             ans3 = st.radio(q3["question"], q3["options"], key=f"q3_{idx}")
             response[q3["question"]] = ans3
@@ -155,7 +155,7 @@ with st.form("all_images_form"):
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q3")
         with col2b:
-            q4 = {"question": "Rate the image on its realism, on a scale of 1 to 5, where 1 means not realistic at all, 5 means highly realistic.",
+            q4 = {"question": "**Rate the image on its realism, on a scale of 1 to 5, where 1 means not realistic at all, 5 means highly realistic.**",
                   "options": ["1", "2", "3", "4", "5"]}
             ans4 = st.radio(q4["question"], q4["options"], key=f"q4_{idx}")
             response[q4["question"]] = ans4
