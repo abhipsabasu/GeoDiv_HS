@@ -10,6 +10,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from PIL import Image
 import ast
+import json
 import os
 
 firebase_secrets = st.secrets["firebase"]
