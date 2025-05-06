@@ -33,7 +33,7 @@ cred = credentials.Certificate(json.loads(json.dumps(cred_dict)))
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
-Get Firestore client
+# Get Firestore client
 db = firestore.client()
 
 # --- CONFIG ---
