@@ -53,7 +53,7 @@ with st.form("all_images_form"):
         try:
             img_data = requests.get(img_url).content
             image = Image.open(BytesIO(img_data))
-            st.image(image, use_column_width=True)
+            st.image(image, use_container_width=True)
         except:
             st.error("Could not load image.")
             continue
