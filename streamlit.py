@@ -38,62 +38,65 @@ st.write("""You will be shown a number of images, and each such image will
             and mention your choice.""")
 
 # --- SESSION STATE ---
-if "index" not in st.session_state:
-    st.session_state.index = 0
-if "responses" not in st.session_state:
-    st.session_state.responses = []
-
-# --- FETCH CURRENT IMAGE AND QUESTIONS ---
-if st.session_state.index >= len(IMAGE_LIST):
-    st.success("Survey complete. Thank you!")
-    df = pd.DataFrame(st.session_state.responses)
-    st.dataframe(df)
-    csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("Download Responses", csv, "survey_responses.csv", "text/csv")
-    st.stop()
-
-img_name = IMAGE_LIST[st.session_state.index]
-questions = QUESTIONS.get(img_name, [])
-
-# --- LOAD IMAGE ---
-img_url = GITHUB + img_name
-try:
-    img_data = requests.get(img_url).content
-    image = Image.open(BytesIO(img_data))
-    st.image(image, use_column_width=True)
-except:
-    st.error("Could not load image.")
+if "submitted_all" not in st.session_state:
+    st.session_state.submitted_all = False
 
 # --- FORM ---
-with st.form("survey_form"):
-    response = {"image": img_name}
+with st.form("all_images_form"):
+    all_responses = []
 
-    # Layout with 2 columns
-    if len(questions) == 2:
-        col1, col2 = st.columns(2)
-    else:
-        col1 = col2 = st
+    for idx, img_name in enumerate(IMAGE_LIST):
+        st.markdown(f"### Image {idx + 1}: `{img_name}`")
 
-    # Question 1
-    with col1:
-        q1 = questions[0]
-        ans1 = st.multiselect(q1["question"], q1["options"], key="q1")
-        response[q1["question"]] = ans1
-        if "None of the above" in ans1:
-            other1 = st.text_input("Please describe (Q1):")
-            response[f"{q1['question']} - Other"] = other1
+        # Load and display image
+        img_url = GITHUB + img_name
+        try:
+            img_data = requests.get(img_url).content
+            image = Image.open(BytesIO(img_data))
+            st.image(image, use_column_width=True)
+        except:
+            st.error("Could not load image.")
+            continue
 
-    # Question 2
-    with col2:
-        q2 = questions[1]
-        ans2 = st.multiselect(q2["question"], q2["options"], key="q2")
-        response[q2["question"]] = ans2
-        if "None of the above" in ans2:
-            other2 = st.text_input("Please describe (Q2):")
-            response[f"{q2['question']} - Other"] = other2
+        questions = QUESTIONS.get(img_name, [])
+        response = {"image": img_name}
 
-    submitted = st.form_submit_button("Submit")
-    if submitted:
-        st.session_state.responses.append(response)
-        st.session_state.index += 1
-        st.rerun()
+        # Layout with 2 columns
+        if len(questions) == 2:
+            col1, col2 = st.columns(2)
+        else:
+            col1 = col2 = st
+
+        # Question 1
+        with col1:
+            q1 = questions[0]
+            ans1 = st.multiselect(q1["question"], q1["options"], key=f"q1_{idx}")
+            response[q1["question"]] = ans1
+            if "None of the above" in ans1:
+                other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
+                response[f"{q1['question']} - Other"] = other1
+
+        # Question 2
+        with col2:
+            q2 = questions[1]
+            ans2 = st.multiselect(q2["question"], q2["options"], key=f"q2_{idx}")
+            response[q2["question"]] = ans2
+            if "None of the above" in ans2:
+                other2 = st.text_input("Please describe (Q2):", key=f"other2_{idx}")
+                response[f"{q2['question']} - Other"] = other2
+
+        all_responses.append(response)
+        st.markdown("---")
+
+    submitted = st.form_submit_button("Submit All")
+
+# --- HANDLE FINAL SUBMISSION ---
+if submitted or st.session_state.submitted_all:
+    st.session_state.submitted_all = True
+    df = pd.DataFrame(all_responses)
+    st.success("Survey complete. Thank you!")
+    st.dataframe(df)
+
+    # CSV download
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button("Download Responses", csv, "survey_responses.csv", "text/csv")
