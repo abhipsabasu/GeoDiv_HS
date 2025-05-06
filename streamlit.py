@@ -61,7 +61,7 @@ for idx, row in df.iterrows():
                                     "options": row['attribute_values_y']}]
 # --- UI HEADER ---
 st.title("A Survey on Image-based Question Answering")
-st.write("""You will be shown a number of images, and each such image will be accompanied by **TWO questions**.  
+st.write("""You will be shown a number of images, and each such image will be accompanied by **FOUR questions**.  
 Answer **ALL** questions.  
 **Total time: 45 minutes**
 
