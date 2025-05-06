@@ -151,7 +151,7 @@ if submitted:
             st.warning(f"Missing: {q}")
     else:
         # timestamp = datetime.datetime.utcnow()
-        doc_ref = st.session_state.db.collection("survey_responses").document(st.session_state.prolific_id)
+        doc_ref = st.session_state.db.collection("GeoDiv survey_responses").document(st.session_state.prolific_id)
         doc_ref.set({
             "prolific_id": st.session_state.prolific_id,
             "timestamp": firestore.SERVER_TIMESTAMP,
