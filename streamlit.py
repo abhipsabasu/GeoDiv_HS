@@ -46,7 +46,7 @@ with st.form("all_images_form"):
     all_responses = []
 
     for idx, img_name in enumerate(IMAGE_LIST):
-        st.markdown(f"### Image {idx + 1}: `{img_name}`")
+        # st.markdown(f"### Image {idx + 1}: `{img_name}`")
 
         # Load and display image
         img_url = GITHUB + img_name
