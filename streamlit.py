@@ -12,35 +12,29 @@ from PIL import Image
 import ast
 import os
 
-# firebase_secrets = st.secrets["firebase"]
+firebase_secrets = st.secrets["firebase"]
 
-# # Convert secrets to dict
-# cred_dict = {
-#     "type": firebase_secrets["type"],
-#     "project_id": firebase_secrets["project_id"],
-#     "private_key_id": firebase_secrets["private_key_id"],
-#     "private_key": firebase_secrets["private_key"].replace("\\n", "\n"),  # Fix multi-line key
-#     "client_email": firebase_secrets["client_email"],
-#     "client_id": firebase_secrets["client_id"],
-#     "auth_uri": firebase_secrets["auth_uri"],
-#     "token_uri": firebase_secrets["token_uri"],
-#     "auth_provider_x509_cert_url": firebase_secrets["auth_provider_x509_cert_url"],
-#     "client_x509_cert_url": firebase_secrets["client_x509_cert_url"],
-#     "universe_domain": firebase_secrets["universe_domain"],
-# }
-# cred = credentials.Certificate(json.loads(json.dumps(cred_dict)))
-# # Initialize Firebase (only if not already initialized)
-# if not firebase_admin._apps:
-#     firebase_admin.initialize_app(cred)
-
-# Get Firestore client
-# db = firestore.client()
-
-if "firebase_initialized" not in st.session_state:
-    cred = credentials.Certificate("synthesis-a89ec-firebase-adminsdk-7rxn2-340276533d.json")  # Replace with your path
+# Convert secrets to dict
+cred_dict = {
+    "type": firebase_secrets["type"],
+    "project_id": firebase_secrets["project_id"],
+    "private_key_id": firebase_secrets["private_key_id"],
+    "private_key": firebase_secrets["private_key"].replace("\\n", "\n"),  # Fix multi-line key
+    "client_email": firebase_secrets["client_email"],
+    "client_id": firebase_secrets["client_id"],
+    "auth_uri": firebase_secrets["auth_uri"],
+    "token_uri": firebase_secrets["token_uri"],
+    "auth_provider_x509_cert_url": firebase_secrets["auth_provider_x509_cert_url"],
+    "client_x509_cert_url": firebase_secrets["client_x509_cert_url"],
+    "universe_domain": firebase_secrets["universe_domain"],
+}
+cred = credentials.Certificate(json.loads(json.dumps(cred_dict)))
+# Initialize Firebase (only if not already initialized)
+if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
-    db = firestore.client()
-    st.session_state.firebase_initialized = True
+
+Get Firestore client
+db = firestore.client()
 
 # --- CONFIG ---
 GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
