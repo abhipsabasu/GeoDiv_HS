@@ -154,7 +154,7 @@ with st.form("all_images_form"):
             if not ans3:
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q3")
-        with col4:
+        with col2b:
             q4 = {"question": "Rate the image on its realism, on a scale of 1 to 5, where 1 means not realistic at all, 5 means highly realistic.",
                   "options": ["1", "2", "3", "4", "5"]}
             ans4 = st.radio(q4["question"], q4["options"], key=f"q4_{idx}")
