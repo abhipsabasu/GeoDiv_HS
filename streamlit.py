@@ -40,7 +40,7 @@ db = firestore.client()
 # --- CONFIG ---
 GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
 
-response_obj = requests.get(GITHUB + 'sampled_object_attributes_withnewpaths.csv')
+response_obj = requests.get(GITHUB + 'updated_sampled_object_attributes.csv')
 df_obj = pd.read_csv(StringIO(response_obj.text))
 
 response_bg = requests.get(GITHUB + 'df_bgr_sampled_updated_withnewpaths.csv')
