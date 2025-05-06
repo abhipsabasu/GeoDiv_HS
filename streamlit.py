@@ -89,6 +89,8 @@ with st.form("all_images_form"):
             q1 = questions[0]
             ans1 = st.multiselect(q1["question"], q1["options"], key=f"q1_{idx}")
             response[q1["question"]] = ans1
+            if not ans1:
+                incomplete = True
             # if "None of the above" in ans1:
             #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
             #     response[f"{q1['question']} - Other"] = other1
@@ -98,6 +100,8 @@ with st.form("all_images_form"):
             q2 = questions[1]
             ans2 = st.multiselect(q2["question"], q2["options"], key=f"q2_{idx}")
             response[q2["question"]] = ans2
+            if not ans2:
+                incomplete = True
             # if "None of the above" in ans2:
             #     other2 = st.text_input("Please describe (Q2):", key=f"other2_{idx}")
             #     response[f"{q2['question']} - Other"] = other2
