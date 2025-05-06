@@ -33,9 +33,25 @@ for idx, row in df.iterrows():
 st.title("A Survey on Image-based Question Answering")
 st.write("""You will be shown a number of images, and each such image will 
             be accompanied by TWO questions. Each question will be associated 
-            with a few options. Multiple options can be correct. If you do 
-            not feel any of the options is correct, select None of this, 
-            and mention your choice.""")
+            with a few options. **Multiple options can be correct.** If you do 
+            not feel any of the options is correct, select **None of the above**.""")
+
+if "prolific_id" not in st.session_state:
+    st.session_state.prolific_id = None
+
+if not st.session_state.prolific_id:
+    with st.form("prolific_form"):
+        st.write("## Please enter your Prolific ID to begin:")
+        pid = st.text_input("Prolific ID", max_chars=24)
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            if pid.strip():
+                st.session_state.prolific_id = pid.strip()
+                st.success("Thank you! You may now begin the survey.")
+                st.rerun()
+            else:
+                st.error("Please enter a valid Prolific ID.")
+    st.stop()  # Stop further execution until ID is entered
 
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
@@ -43,8 +59,9 @@ if "submitted_all" not in st.session_state:
 
 # --- FORM ---
 with st.form("all_images_form"):
+    
     all_responses = []
-
+    incomplete = False  # Flag to check if any question was left unanswered
     for idx, img_name in enumerate(IMAGE_LIST):
         st.markdown(f"### Image {idx + 1}: `{img_name}`")
 
@@ -72,18 +89,18 @@ with st.form("all_images_form"):
             q1 = questions[0]
             ans1 = st.multiselect(q1["question"], q1["options"], key=f"q1_{idx}")
             response[q1["question"]] = ans1
-            if "None of the above" in ans1:
-                other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
-                response[f"{q1['question']} - Other"] = other1
+            # if "None of the above" in ans1:
+            #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
+            #     response[f"{q1['question']} - Other"] = other1
 
         # Question 2
         with col2:
             q2 = questions[1]
             ans2 = st.multiselect(q2["question"], q2["options"], key=f"q2_{idx}")
             response[q2["question"]] = ans2
-            if "None of the above" in ans2:
-                other2 = st.text_input("Please describe (Q2):", key=f"other2_{idx}")
-                response[f"{q2['question']} - Other"] = other2
+            # if "None of the above" in ans2:
+            #     other2 = st.text_input("Please describe (Q2):", key=f"other2_{idx}")
+            #     response[f"{q2['question']} - Other"] = other2
 
         all_responses.append(response)
         st.markdown("---")
@@ -91,12 +108,15 @@ with st.form("all_images_form"):
     submitted = st.form_submit_button("Submit All")
 
 # --- HANDLE FINAL SUBMISSION ---
-if submitted or st.session_state.submitted_all:
-    st.session_state.submitted_all = True
-    df = pd.DataFrame(all_responses)
-    st.success("Survey complete. Thank you!")
-    st.dataframe(df)
+if submitted:
+    if incomplete:
+        st.error("Please answer all questions before submitting.")
+    else:
+        st.session_state.submitted_all = True
+        df = pd.DataFrame(all_responses)
+        st.success("Survey complete. Thank you!")
+        st.dataframe(df)
 
-    # CSV download
-    csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("Download Responses", csv, "survey_responses.csv", "text/csv")
+        # CSV download
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("Download Responses", csv, "survey_responses.csv", "text/csv")
