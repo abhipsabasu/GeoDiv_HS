@@ -164,8 +164,8 @@ if submitted:
         st.session_state.submitted_all = True
         df = pd.DataFrame(all_responses)
         st.success("Survey complete. Thank you!")
-        st.dataframe(df)
+        # st.dataframe(df)
 
         # CSV download
-        csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("Download Responses", csv, "survey_responses.csv", "text/csv")
+        # csv = df.to_csv(index=False).encode("utf-8")
+        # st.download_button("Download Responses", csv, "survey_responses.csv", "text/csv")
