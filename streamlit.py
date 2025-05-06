@@ -68,9 +68,10 @@ Answer **ALL** questions.
 ### Instructions:
 
 1. See the image very carefully before answering a question.  
-2. Each question will be associated with a few options. **Multiple options can be correct.**  
+2. Each question will be associated with a few options. **Multiple options can be correct for the first two questions.**  
 3. If you do not feel any of the options is correct, select **None of the above**.  
 4. You can refer to the internet in case you want to know more about certain options.
+5. The bottom two questions are **single-options only**.
 """)
 
 if "prolific_id" not in st.session_state:
