@@ -61,13 +61,17 @@ for idx, row in df.iterrows():
                                     "options": row['attribute_values_y']}]
 # --- UI HEADER ---
 st.title("A Survey on Image-based Question Answering")
-st.write("""You will be shown a number of images, and each such image will 
-            be accompanied by TWO questions. Answer ALL questions. Total time: **45 mins**. Here are the instructions:
-            
-            * See the image very carefully before answering a question.
-            * Each question will be associated with a few options. **Multiple options can be correct.** 
-            * If you do not feel any of the options is correct, select **None of the above**.
-            * You can refer to the internet in case you want to know more about certain options.""")
+st.write("""You will be shown a number of images, and each such image will be accompanied by **TWO questions**.  
+Answer **ALL** questions.  
+**Total time: 45 minutes**
+
+### Instructions:
+
+1. See the image very carefully before answering a question.  
+2. Each question will be associated with a few options. **Multiple options can be correct.**  
+3. If you do not feel any of the options is correct, select **None of the above**.  
+4. You can refer to the internet in case you want to know more about certain options.
+""")
 
 if "prolific_id" not in st.session_state:
     st.session_state.prolific_id = None
