@@ -3,9 +3,38 @@ import pandas as pd
 import requests
 from io import BytesIO
 from io import StringIO
+import datetime
+import time
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 from PIL import Image
 import ast
 import os
+
+firebase_secrets = st.secrets["firebase"]
+
+# Convert secrets to dict
+cred_dict = {
+    "type": firebase_secrets["type"],
+    "project_id": firebase_secrets["project_id"],
+    "private_key_id": firebase_secrets["private_key_id"],
+    "private_key": firebase_secrets["private_key"].replace("\\n", "\n"),  # Fix multi-line key
+    "client_email": firebase_secrets["client_email"],
+    "client_id": firebase_secrets["client_id"],
+    "auth_uri": firebase_secrets["auth_uri"],
+    "token_uri": firebase_secrets["token_uri"],
+    "auth_provider_x509_cert_url": firebase_secrets["auth_provider_x509_cert_url"],
+    "client_x509_cert_url": firebase_secrets["client_x509_cert_url"],
+    "universe_domain": firebase_secrets["universe_domain"],
+}
+cred = credentials.Certificate(json.loads(json.dumps(cred_dict)))
+# Initialize Firebase (only if not already initialized)
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred)
+
+# Get Firestore client
+db = firestore.client()
 
 # --- CONFIG ---
 GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
@@ -61,6 +90,7 @@ if "submitted_all" not in st.session_state:
 with st.form("all_images_form"):
     
     all_responses = []
+    missing_questions = []
     incomplete = False  # Flag to check if any question was left unanswered
     for idx, img_name in enumerate(IMAGE_LIST):
         st.markdown(f"### Image {idx + 1}: `{img_name}`")
@@ -91,6 +121,7 @@ with st.form("all_images_form"):
             response[q1["question"]] = ans1
             if not ans1:
                 incomplete = True
+                missing_questions.append(f"Image {idx + 1} - Q1")
             # if "None of the above" in ans1:
             #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
             #     response[f"{q1['question']} - Other"] = other1
@@ -102,6 +133,7 @@ with st.form("all_images_form"):
             response[q2["question"]] = ans2
             if not ans2:
                 incomplete = True
+                missing_questions.append(f"Image {idx + 1} - Q2")
             # if "None of the above" in ans2:
             #     other2 = st.text_input("Please describe (Q2):", key=f"other2_{idx}")
             #     response[f"{q2['question']} - Other"] = other2
@@ -115,7 +147,16 @@ with st.form("all_images_form"):
 if submitted:
     if incomplete:
         st.error("Please answer all questions before submitting.")
+        for q in missing_questions:
+            st.warning(f"Missing: {q}")
     else:
+        # timestamp = datetime.datetime.utcnow()
+        doc_ref = st.session_state.db.collection("survey_responses").document(st.session_state.prolific_id)
+        doc_ref.set({
+            "prolific_id": st.session_state.prolific_id,
+            "timestamp": firestore.SERVER_TIMESTAMP,
+            "responses": all_responses
+        })
         st.session_state.submitted_all = True
         df = pd.DataFrame(all_responses)
         st.success("Survey complete. Thank you!")
