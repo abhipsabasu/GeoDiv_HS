@@ -80,11 +80,11 @@ for idx, row in df.iterrows():
 st.title("A Study on Image-based Question Answering")
 st.write("""You will be shown a number of images, and each such image will be accompanied by **THREE questions**.  
 Each image will primarily portray an entity.
-The questions will enquire about three things: 
-*Affluence*: Whether the image reflects impoverished or affluent conditions.
-*General Condition*: The physical state of depicted objects (e.g., worn, damaged,or pristine).
-*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) are present versus globalized visual cues in the primary entity.
-Answer **ALL** questions.  
+The questions will enquire about three things:\n 
+*Affluence*: Whether the image reflects impoverished or affluent conditions.\n
+*General Condition*: The physical state of depicted objects (e.g., worn, damaged,or pristine).\n
+*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) are present versus globalized visual cues in the primary entity.\n
+Answer **ALL** questions.  \n
 **Total time: 45 minutes**
 
 ### Instructions:
