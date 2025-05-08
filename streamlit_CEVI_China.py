@@ -39,8 +39,8 @@ db = firestore.client()
 
 # --- CONFIG ---
 GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
-
-response = requests.get(GITHUB + 'China.csv')
+country = 'China'
+response = requests.get(GITHUB + f'{country}.csv')
 df = pd.read_csv(StringIO(response.text))
 
 IMAGE_LIST =  list(df['new_image_path'])# filenames in the GitHub repo
@@ -54,7 +54,7 @@ q3 = "Rate this image on the *cultural localization* of the primary entity with 
 a1 = ["1 – **Impoverished**:	Severe visible decay; disrepair, dirt, broken infrastructure, minimal economic activity.",
       "2 – **Low Affluence**:	Basic but aging structures; modest upkeep; informal or patchy development visible.",
       "3 – **Moderate Affluence**:	Clean and functional spaces; organized but simple environments; middle-income indicators.",
-      "4 – **High Affluence**:	Well-maintained, vibrant areas; professional storefronts; signs of prosperity and civic care."
+      "4 – **High Affluence**:	Well-maintained, vibrant areas; professional storefronts; signs of prosperity and civic care.",
       "5 – **Very High Affluence (Luxury)**:	Sleek, modern, or designer elements; upscale brands; spotless, elite environments."]
 
 a2 = ["1 – **Severely Damaged**:	Major disrepair, heavy rust, breakage, or abandonment visible.",
@@ -190,7 +190,7 @@ if submitted:
             st.warning(f"Missing: {q}")
     else:
         # timestamp = datetime.datetime.utcnow()
-        doc_ref = db.collection("GeoDiv (CEVI) survey_responses").document(st.session_state.prolific_id)
+        doc_ref = db.collection(f"GeoDiv (CEVI) survey_responses_{country}").document(st.session_state.prolific_id)
         doc_ref.set({
             "prolific_id": st.session_state.prolific_id,
             "timestamp": firestore.SERVER_TIMESTAMP,
