@@ -76,7 +76,24 @@ for idx, row in df.iterrows():
                                     "options": a2},
                                     {"question": '**'+q3+'**', 
                                     "options": a3}]
+# --- UI HEADER ---
+st.title("A Study on Image-based Question Answering")
+st.write("""You will be shown a number of images, and each such image will be accompanied by **THREE questions**.  
+Each image will primarily portray an entity.
+The questions will enquire about three things:\n 
+*Affluence*: Whether the image reflects impoverished or affluent conditions.\n
+*General Condition*: The physical state of depicted objects (e.g., worn, damaged,or pristine).\n
+*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) are present versus globalized visual cues in the primary entity.\n
+Answer **ALL** questions.  \n
+**Total time: 45 minutes**
 
+### Instructions:
+
+1. See the image very carefully before answering a question.  
+2. Each question can be answered on a scale of 1 to 5. 
+3. We will define the scores within each scale for each question. READ them carefully.  
+
+""")
 if "prolific_id" not in st.session_state:
     st.session_state.prolific_id = None
 
