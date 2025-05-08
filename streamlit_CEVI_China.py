@@ -41,7 +41,7 @@ db = firestore.client()
 GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
 
 response = requests.get(GITHUB + 'China.csv')
-df = pd.read_csv(StringIO(response_obj.text))
+df = pd.read_csv(StringIO(response.text))
 
 IMAGE_LIST =  list(df['new_image_path'])# filenames in the GitHub repo
 QUESTIONS = {}
