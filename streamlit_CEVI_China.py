@@ -77,6 +77,23 @@ for idx, row in df.iterrows():
                                     {"question": '**'+q3+'**', 
                                     "options": a3}]
 
+if "prolific_id" not in st.session_state:
+    st.session_state.prolific_id = None
+
+if not st.session_state.prolific_id:
+    with st.form("prolific_form"):
+        st.write("## Please enter your Prolific ID to begin:")
+        pid = st.text_input("Prolific ID", max_chars=24)
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            if pid.strip():
+                st.session_state.prolific_id = pid.strip()
+                st.success("Thank you! You may now begin the survey.")
+                st.rerun()
+            else:
+                st.error("Please enter a valid Prolific ID.")
+    st.stop()  # Stop further execution until ID is entered
+    
 if "page_idx" not in st.session_state:
     st.session_state.page_idx = 0
 if "responses" not in st.session_state:
