@@ -74,6 +74,8 @@ for idx, row in df.iterrows():
                                     "options": a1},
                                   {"question": '**'+q2+'**', 
                                     "options": a2},
+                                    {"question": '**'+q3+'**', 
+                                    "options": a3}]
 
 if "page_idx" not in st.session_state:
     st.session_state.page_idx = 0
