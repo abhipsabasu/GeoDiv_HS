@@ -3,3 +3,7 @@ __pycache__
 .devcontainer
 get_data.py
 GeoDiv_survey_responses.csv
+VQA_HS.csv
+VQA_HS1.csv
+get_accuracy.py
+get_data.py
