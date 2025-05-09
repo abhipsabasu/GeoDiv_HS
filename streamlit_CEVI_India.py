@@ -79,7 +79,7 @@ for idx, row in df.iterrows():
 # --- UI HEADER ---
 st.title("A Study on Image-based Question Answering")
 st.write("""You will be shown a number of images, and each such image will be accompanied by **THREE questions**.  
-Each image will primarily portray an entity.
+Each image will *primarily* portray one *entity*, which shall be mentioned on the top of the image.
 The questions will enquire about three things:\n 
 *Affluence*: Whether the *overall* image reflects impoverished or affluent conditions.\n
 *General Condition*: The physical state of depicted entity (e.g., worn, damaged,or pristine).\n
