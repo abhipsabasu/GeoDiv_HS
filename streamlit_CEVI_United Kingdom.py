@@ -49,7 +49,7 @@ ENTITY_LIST = list(df['concept'])
 
 q1 = "Rate this image on the level of *affluence* depicted in the *entire* image. The options are a scale of 1 to 5, where each score is defined within the options."
 q2 = "Rate this image on the *general condition* of the *entity*. The options are a scale of 1 to 5, where each score is defined within the options."
-q3 = "Rate this image on the *cultural localization* of the *entity* with respect to *your* country. The options are a scale of 1 to 5, where each score is defined within the options."
+q3 = 'Rate this image on the *cultural localization* of the *entity* with respect to <p style="color:red;">*your*</p> country. The options are a scale of 1 to 5, where each score is defined within the options.'
 
 a1 = ["1 – **Impoverished**:	Severe visible decay; disrepair, dirt, broken infrastructure, minimal economic activity.",
       "2 – **Low Affluence**:	Basic but aging structures; modest upkeep; informal or patchy development visible.",
@@ -81,9 +81,9 @@ st.title("A Study on Image-based Question Answering")
 st.write("""You will be shown a number of images, and each such image will be accompanied by **THREE questions**.  
 Each image will primarily portray an entity.
 The questions will enquire about three things:\n 
-*Affluence*: Whether the *overall* image reflects impoverished or affluent conditions.\n
-*General Condition*: The physical state of depicted entity (e.g., worn, damaged,or pristine).\n
-*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) of *your country* are present versus globalized visual cues in the *entity*.\n
+*Affluence*: Whether the <p style="color:red;">*overall*</p> image reflects impoverished or affluent conditions.\n
+*General Condition*: The physical state of <p style="color:red;">depicted entity</p> (e.g., worn, damaged,or pristine).\n
+*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) of <p style="color:red;">*your country*</p> are present versus globalized visual cues in the *entity*.\n
 Answer **ALL** questions.  \n
 **Total time: 30 minutes**
 
