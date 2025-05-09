@@ -81,9 +81,9 @@ st.title("A Study on Image-based Question Answering")
 st.write("""You will be shown a number of images, and each such image will be accompanied by **THREE questions**.  
 Each image will primarily portray an entity.
 The questions will enquire about three things:\n 
-*Affluence*: Whether the *overall* image reflects impoverished or affluent conditions.\n
-*General Condition*: The physical state of depicted entity (e.g., worn, damaged,or pristine).\n
-*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) of *your country* are present versus globalized visual cues in the *entity*.\n
+**Affluence**: Whether the **overall** image reflects **impoverished** or **affluent conditions**.\n
+**General Condition**: The **physical state** of the **depicted entity** (e.g., worn, damaged,or pristine).\n
+**Cultural Localization**: The extent to which **culturally specific symbols** (e.g., religious motifs, traditional architecture) of **your country** are present versus globalized visual cues in the **entity**.\n
 Answer **ALL** questions.  \n
 **Total time: 30 minutes**
 
