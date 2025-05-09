@@ -85,7 +85,7 @@ The questions will enquire about three things:\n
 *General Condition*: The physical state of depicted entity (e.g., worn, damaged,or pristine).\n
 *Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) are present versus globalized visual cues in the *entity*.\n
 Answer **ALL** questions.  \n
-**Total time: 45 minutes**
+**Total time: 30 minutes**
 
 ### Instructions:
 
