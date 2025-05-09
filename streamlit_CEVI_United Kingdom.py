@@ -39,7 +39,7 @@ db = firestore.client()
 
 # --- CONFIG ---
 GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
-country = 'China'
+country = 'United Kingdom'
 response = requests.get(GITHUB + f'{country}.csv')
 df = pd.read_csv(StringIO(response.text))
 
