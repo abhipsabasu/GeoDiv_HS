@@ -153,7 +153,7 @@ with st.form(f"form_{st.session_state.page_idx}"):
 
     for q_idx, q in enumerate(questions):
         key = f"img{st.session_state.page_idx}_q{q_idx}"
-        ans = st.radio(f"This image is of the entity {entity}. "+q["question"], q["options"], key=key, index=None)
+        ans = st.radio(f"**This image is of the entity: {entity}**. "+q["question"], q["options"], key=key, index=None)
         response[q["question"]] = ans
         if not ans:
             missing = True
