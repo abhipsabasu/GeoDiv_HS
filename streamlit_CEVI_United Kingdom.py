@@ -83,7 +83,7 @@ Each image will primarily portray an entity.
 The questions will enquire about three things:\n 
 *Affluence*: Whether the *overall* image reflects impoverished or affluent conditions.\n
 *General Condition*: The physical state of depicted entity (e.g., worn, damaged,or pristine).\n
-*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) are present versus globalized visual cues in the *entity*.\n
+*Cultural Localization*: The extent to which culturally specific symbols (e.g., religious motifs, traditional architecture) of *your country* are present versus globalized visual cues in the *entity*.\n
 Answer **ALL** questions.  \n
 **Total time: 30 minutes**
 
