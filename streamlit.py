@@ -40,10 +40,10 @@ db = firestore.client()
 # --- CONFIG ---
 GITHUB = "https://raw.githubusercontent.com/abhipsabasu/GeoDiv_HS/main/"
 
-response_obj = requests.get(GITHUB + 'updated_sampled_object_attributes.csv')
+response_obj = requests.get(GITHUB + 'new_objattr_neurips_withnewpaths.csv')
 df_obj = pd.read_csv(StringIO(response_obj.text))
 
-response_bg = requests.get(GITHUB + 'df_bgr_sampled_updated_withnewpaths.csv')
+response_bg = requests.get(GITHUB + 'new_bgrattr_neurips_updated_withnewpaths.csv')
 df_bg = pd.read_csv(StringIO(response_bg.text))
 
 df = pd.merge(df_obj, df_bg, on=['concept_id', 'new_path'], how='inner')
@@ -99,6 +99,11 @@ if "submitted_all" not in st.session_state:
 # --- FORM ---
 with st.form("all_images_form"):
     
+    # The `all_res` variable is storing the responses provided by the user for each image in the
+    # survey. It is a list that contains dictionaries where each dictionary represents the responses
+    # for a particular image. Each dictionary includes the image name, the answers to the questions
+    # associated with that image, the confidence rating in answering the questions, and the rating
+    # given to the image on its realism.
     all_responses = []
     missing_questions = []
     incomplete = False  # Flag to check if any question was left unanswered
