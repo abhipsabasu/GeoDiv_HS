@@ -12,6 +12,7 @@ from PIL import Image
 import ast
 import json
 import os
+import random
 
 firebase_secrets = st.secrets["firebase"]
 
