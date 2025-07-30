@@ -97,7 +97,7 @@ if not st.session_state.prolific_id:
 if "page_idx" not in st.session_state:
     st.session_state.page_idx = 0
 if "responses" not in st.session_state:
-    st.session_state.responses = {img: None for img in IMAGE_LIST}
+    st.session_state.responses = []
 
 if "shuffled_images" not in st.session_state:
     st.session_state.shuffled_images = random.sample(IMAGE_LIST, len(IMAGE_LIST))
