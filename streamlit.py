@@ -194,17 +194,21 @@ with st.form("all_images_form"):
         q3 = "Is the image indoor or outdoor?"
         indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
         response["q3"] = indoor_flag
-        if indoor_flag == 'Indoor':
-            q4 = questions[1]["ind_q"]
-            options = questions[1]["options"]
-        else:
-            q4 = questions[2]["out_q"]
-            options = questions[2]["options"]
-        if indoor_flag == 'Choose an option':
-            incomplete = True
-            missing_questions.append(f"Image {idx + 1} - Q3")
+        # if indoor_flag == 'Indoor':
+        q4 = questions[1]["ind_q"]
+        options = questions[1]["options"]
         ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
         response["q4"] = ans_bg
+        # else:
+        q6 = questions[2]["out_q"]
+        options = questions[2]["options"]
+        ans_bg1 = st.multiselect(q6, options, key=f"q4_{idx}")
+        response["q6"] = ans_bg1
+        # if indoor_flag == 'Choose an option':
+        #     incomplete = True
+        #     missing_questions.append(f"Image {idx + 1} - Q3")
+        
+        # response["q4"] = ans_bg
         if not ans_bg:
             incomplete = True
             missing_questions.append(f"Image {idx + 1} - Q4")
