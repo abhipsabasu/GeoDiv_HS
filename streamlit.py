@@ -199,7 +199,7 @@ with st.form("all_images_form"):
         if bg_visible == 'Choose an option':
             incomplete = True
             missing_questions.append(f"Image {idx + 1} - Q2")
-        st.write(bg_visible)
+        
         # if bg_visible == 'Yes':
         q3 = "Is the image indoor or outdoor?"
         indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
@@ -226,7 +226,6 @@ with st.form("all_images_form"):
         q5 = {"question": "**Rate your confidence in answering the questions.**",
                 "options": ["High confidence", "Medium confidence", "Low confidence"]}
         ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}")
-        st.write(ans5)
         if not ans5:
             incomplete = True
             missing_questions.append(f"Image {idx + 1} - Q5")
