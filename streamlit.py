@@ -56,7 +56,7 @@ IMAGE_LIST =  list(df['img_path'])# filenames in the GitHub repo
 QUESTIONS = {}
 
 for idx, row in df.iterrows():
-    QUESTIONS[row['new_path']] = [{"entity_q": '**For answering this question, focus only on the primary entity. '+row['question']+'**', 
+    QUESTIONS[row['img_path']] = [{"entity_q": '**For answering this question, focus only on the primary entity. '+row['question']+'**', 
                                     "options": ['The enquired entity attribute is not visible in the image'] + row['attribute_values']},
                                   {"ind_q": '**'+row['ind_question']+'**', 
                                     "options": ['The enquired background attribute is not visible in the image'] + row['ind_attribute_values']},
