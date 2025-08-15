@@ -46,22 +46,25 @@ df_obj = pd.read_csv(StringIO(response_obj.text))
 response_bg = requests.get(GITHUB + 'new_bgrattr_neurips_updated_withnewpaths.csv')
 df_bg = pd.read_csv(StringIO(response_bg.text))
 
-df = pd.merge(df_obj, df_bg, on=['concept_id', 'new_path'], how='inner')
+df = pd.merge(df_obj, df_bg, on=['concept', 'img_path'], how='inner')
 
-df["attribute_values_x"] = df["attribute_values_x"].apply(ast.literal_eval)
-df["attribute_values_y"] = df["attribute_values_y"].apply(ast.literal_eval)
+df["attribute_values"] = df["attribute_values"].apply(ast.literal_eval)
+df["ind_attribute_values"] = df["ind_attribute_values"].apply(ast.literal_eval)
+df["out_attribute_values"] = df["out_attribute_values"].apply(ast.literal_eval)
 
-IMAGE_LIST =  list(df['new_path'])# filenames in the GitHub repo
+IMAGE_LIST =  list(df['img_path'])# filenames in the GitHub repo
 QUESTIONS = {}
 
 for idx, row in df.iterrows():
-    QUESTIONS[row['new_path']] = [{"question": '**'+row['question_x']+'**', 
-                                    "options": row['attribute_values_x']},
-                                  {"question": '**'+row['question_y']+'**', 
-                                    "options": row['attribute_values_y']}]
+    QUESTIONS[row['new_path']] = [{"entity_q": '**For answering this question, focus only on the primary entity. '+row['question']+'**', 
+                                    "options": ['The enquired entity attribute is not visible in the image'] + row['attribute_values']},
+                                  {"ind_q": '**'+row['ind_question']+'**', 
+                                    "options": ['The enquired background attribute is not visible in the image'] + row['ind_attribute_values']},
+                                  {"out_q": '**'+row['out_question']+'**', 
+                                    "options": ['The enquired background attribute is not visible in the image'] + row['out_attribute_values']}]
 # --- UI HEADER ---
 st.title("A Study on Image-based Question Answering")
-st.write("""You will be shown a number of images, and each such image will be accompanied by **FOUR questions**.  
+st.write("""You will be shown a number of images, and each such image will be accompanied by **FIVE questions**. The first question will be about the **primary entity** depicted in the image. The second, third and fourth questions will be about the background of the image, excluding the primary entity. The last question will ask you to rate your confidence in answering the questions.
 Answer **ALL** questions.  
 **Total time: 45 minutes**
 
@@ -69,11 +72,44 @@ Answer **ALL** questions.
 
 1. See the image very carefully before answering a question.  
 2. Each question will be associated with options. 
-3. **Multiple options can be correct for the first two questions.**  
-4. If you do not feel any of the options is correct, select **None of the above**.  
-5. You can refer to the internet in case you want to know more about certain options.
-6. The bottom two questions are **single-options only**.
+3. **Multiple options can be correct for the first three questions.**  
+4. If you do not feel any of the options is correct, select **None of the above**.
 """)
+
+db_name = "GeoDiv_VDI_Assessment"
+
+def collate_info(db_name, prolific_id):
+    # Fetch responses
+    docs = db.collection(db_name).stream()
+    data = [doc.to_dict() for doc in docs]
+    df = pd.DataFrame(data) #.read_csv("vdi_2.csv")
+    # df.to_csv(f"vdi_2.csv", index=False)
+    # print("Downloaded to image_geolocalization_hs.csv")
+    df['responses'] = df['responses'].astype(str)
+    df['responses'] = df['responses'].apply(ast.literal_eval)
+    df = df[df['prolific_id'] == prolific_id]
+    if len(df) == 0:
+        return None
+    row = df.iloc[0].to_dict()['responses']
+    print(len(row))
+    all_rows = []
+    for lst in row:
+        dic = {}
+        dic["image"] = lst["image"]
+        keys = [key for key in lst if ('Rate' not in key and key!="image")]
+        dic["q1"] = keys[0]
+        dic["a1"] = lst[keys[0]]
+        dic["q2"] = keys[1]
+        dic["a2"] = lst[keys[1]]
+        dic["q3"] = keys[2]
+        dic["a3"] = lst[keys[2]]
+        dic["q4"] = keys[3]
+        dic["a4"] = lst[keys[3]]
+        dic["q5"] = keys[4]
+        dic["a5"] = lst[keys[4]]
+
+        all_rows.append(dic)
+    return all_rows
 
 if "prolific_id" not in st.session_state:
     st.session_state.prolific_id = None
@@ -92,6 +128,7 @@ if not st.session_state.prolific_id:
                 st.error("Please enter a valid Prolific ID.")
     st.stop()  # Stop further execution until ID is entered
 
+db_len = len(collate_info(db_name, st.session_state.prolific_id))
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
     st.session_state.submitted_all = False
@@ -106,8 +143,9 @@ with st.form("all_images_form"):
     # given to the image on its realism.
     all_responses = []
     missing_questions = []
-    incomplete = False  # Flag to check if any question was left unanswered
-    for idx, img_name in enumerate(IMAGE_LIST):
+    # Flag to check if any question was left unanswered
+    for idx, img_name in enumerate(IMAGE_LIST[db_len:]):
+        incomplete = False
         st.markdown(f"### Image {idx + 1}")
 
         # Load and display image
@@ -121,54 +159,59 @@ with st.form("all_images_form"):
             continue
 
         questions = QUESTIONS.get(img_name, [])
-        response = {"image": img_name}
+        response = {"image": img_name, "q1": None, "q2": None, "q3": None, "q4": None, "q5": None}
 
         # Layout with 2 columns
         # if len(questions) == 4:
-        col1a, col1b = st.columns(2)
+        # col1a, col1b = st.columns(2)
         # else:
             # col1 = col2 = st
 
         # Question 1
-        with col1a:
-            q1 = questions[0]
-            ans1 = st.multiselect(q1["question"], q1["options"], key=f"q1_{idx}")
-            response[q1["question"]] = ans1
-            if not ans1:
-                incomplete = True
-                missing_questions.append(f"Image {idx + 1} - Q1")
+        # with col1a:
+        q1 = questions[0]
+        ans1 = st.multiselect(q1["entity_q"], q1["options"], key=f"q1_{idx}")
+        response["q1"] = ans1
+        if not ans1:
+            incomplete = True
+            missing_questions.append(f"Image {idx + 1} - Q1")
             # if "None of the above" in ans1:
             #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
             #     response[f"{q1['question']} - Other"] = other1
-
         # Question 2
-        with col1b:
-            q2 = questions[1]
-            ans2 = st.multiselect(q2["question"], q2["options"], key=f"q2_{idx}")
-            response[q2["question"]] = ans2
-            if not ans2:
-                incomplete = True
-                missing_questions.append(f"Image {idx + 1} - Q2")
-            # if "None of the above" in ans2:
-            #     other2 = st.text_input("Please describe (Q2):", key=f"other2_{idx}")
-            #     response[f"{q2['question']} - Other"] = other2
-        col2a, col2b = st.columns(2)
-        with col2a:
-            q3 = {"question": "**Rate your confidence in answering the question.**",
-                  "options": ["High confidence", "Medium confidence", "Low confidence"]}
-            ans3 = st.radio(q3["question"], q3["options"], key=f"q3_{idx}")
-            response[q3["question"]] = ans3
-            if not ans3:
+        # with col1b:
+        q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
+        bg_visible = st.radio(q2, ['Yes', 'No'], key=f"q2_{idx}", index=None)
+        response["q2"] =  bg_visible
+        if not bg_visible:
+            incomplete = True
+            missing_questions.append(f"Image {idx + 1} - Q2")
+        if bg_visible == 'Yes':
+            q3 = "Is the image indoor or outdoor?"
+            indoor_flag = st.radio(q3, ['Indoor', 'Outdoor'], key=f"q3_{idx}", index=None)
+            response["q3"] = indoor_flag
+            if indoor_flag == 'Indoor':
+                q4 = questions[1]["ind_q"]
+                options = questions[1]["options"]
+            else:
+                q4 = questions[1]["out_q"]
+                options = questions[1]["options"]
+            if not indoor_flag:
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q3")
-        with col2b:
-            q4 = {"question": "**Rate the image on its realism, on a scale of 1 to 5, where 1 means not realistic at all, 5 means highly realistic.**",
-                  "options": ["1", "2", "3", "4", "5"]}
-            ans4 = st.radio(q4["question"], q4["options"], key=f"q4_{idx}")
-            response[q4["question"]] = ans4
-            if not ans4:
+            ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
+            response["q4"] = ans_bg
+            if not ans_bg:
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q4")
+
+        q5 = {"question": "**Rate your confidence in answering the questions.**",
+                "options": ["High confidence", "Medium confidence", "Low confidence"]}
+        ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}")
+        if not ans5:
+            incomplete = True
+            missing_questions.append(f"Image {idx + 1} - Q5")
+        response["q5"] = ans5
         all_responses.append(response)
         st.markdown("---")
 
@@ -182,7 +225,7 @@ if submitted:
             st.warning(f"Missing: {q}")
     else:
         # timestamp = datetime.datetime.utcnow()
-        doc_ref = db.collection("GeoDiv survey_responses").document(st.session_state.prolific_id)
+        doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
         doc_ref.set({
             "prolific_id": st.session_state.prolific_id,
             "timestamp": firestore.SERVER_TIMESTAMP,
