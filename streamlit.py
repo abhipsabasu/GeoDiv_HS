@@ -111,7 +111,7 @@ def collate_info(db_name, prolific_id):
     db_len = 0
     for d in all_rows:
         st.write(d)
-        if d["q2"] == "Choose an option":
+        if d["q1"] == "Choose an option":
             break
         db_len = db_len + 1
 
