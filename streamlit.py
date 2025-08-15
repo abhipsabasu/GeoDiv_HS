@@ -132,7 +132,7 @@ if not st.session_state.prolific_id:
     st.stop()  # Stop further execution until ID is entered
 
 db_prev, db_len = collate_info(db_name, st.session_state.prolific_id)
-
+st.write(db_len)
 
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
