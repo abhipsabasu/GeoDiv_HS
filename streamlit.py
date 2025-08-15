@@ -109,9 +109,11 @@ def collate_info(db_name, prolific_id):
         all_rows.append(dic)
     db_len = 0
     for d in all_rows:
+        st.write(d["q2"])
         if d["q2"] == "Choose an option":
             break
         db_len = db_len + 1
+
     return all_rows, db_len
 
 if "prolific_id" not in st.session_state:
@@ -132,7 +134,7 @@ if not st.session_state.prolific_id:
     st.stop()  # Stop further execution until ID is entered
 
 db_prev, db_len = collate_info(db_name, st.session_state.prolific_id)
-st.write(db_len)
+
 
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
