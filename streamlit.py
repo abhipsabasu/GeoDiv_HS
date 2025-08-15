@@ -188,6 +188,7 @@ with st.form("all_images_form"):
         if not bg_visible:
             incomplete = True
             missing_questions.append(f"Image {idx + 1} - Q2")
+        st.write(bg_visible)
         if bg_visible == 'Yes':
             q3 = "Is the image indoor or outdoor?"
             indoor_flag = st.radio(q3, ['Indoor', 'Outdoor'], key=f"q3_{idx}", index=None)
