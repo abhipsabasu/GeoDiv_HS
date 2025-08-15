@@ -197,8 +197,8 @@ with st.form("all_images_form"):
                 q4 = questions[1]["ind_q"]
                 options = questions[1]["options"]
             else:
-                q4 = questions[1]["out_q"]
-                options = questions[1]["options"]
+                q4 = questions[2]["out_q"]
+                options = questions[2]["options"]
             if not indoor_flag:
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q3")
