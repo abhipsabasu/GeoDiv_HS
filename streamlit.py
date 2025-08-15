@@ -100,16 +100,11 @@ def collate_info(db_name, prolific_id):
         dic = {}
         dic["image"] = lst["image"]
         keys = [key for key in lst if ('Rate' not in key and key!="image")]
-        dic["q1"] = keys[0]
-        dic["a1"] = lst[keys[0]]
-        dic["q2"] = keys[1]
-        dic["a2"] = lst[keys[1]]
-        dic["q3"] = keys[2]
-        dic["a3"] = lst[keys[2]]
-        dic["q4"] = keys[3]
-        dic["a4"] = lst[keys[3]]
-        dic["q5"] = keys[4]
-        dic["a5"] = lst[keys[4]]
+        dic["q1"] = lst[keys[0]]
+        dic["q2"] = lst[keys[1]]
+        dic["q3"] = lst[keys[2]]
+        dic["q4"] = lst[keys[3]]
+        dic["q5"] = lst[keys[4]]
 
         all_rows.append(dic)
     return all_rows
@@ -131,7 +126,9 @@ if not st.session_state.prolific_id:
                 st.error("Please enter a valid Prolific ID.")
     st.stop()  # Stop further execution until ID is entered
 
-db_len = len(collate_info(db_name, st.session_state.prolific_id))
+db_prev = collate_info(db_name, st.session_state.prolific_id)
+db_len = len(db_prev)
+
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
     st.session_state.submitted_all = False
@@ -228,21 +225,21 @@ with st.form("all_images_form"):
 
 # --- HANDLE FINAL SUBMISSION ---
 if submitted:
-    if incomplete:
-        st.error("Please answer all questions before submitting.")
-        for q in missing_questions:
-            st.warning(f"Missing: {q}")
-    else:
+    # if incomplete:
+    #     st.error("Please answer all questions before submitting.")
+    #     for q in missing_questions:
+    #         st.warning(f"Missing: {q}")
+    # else:
         # timestamp = datetime.datetime.utcnow()
-        doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
-        doc_ref.set({
-            "prolific_id": st.session_state.prolific_id,
-            "timestamp": firestore.SERVER_TIMESTAMP,
-            "responses": all_responses
-        })
-        st.session_state.submitted_all = True
-        df = pd.DataFrame(all_responses)
-        st.success("Survey complete. Thank you!")
+    doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+    doc_ref.set({
+        "prolific_id": st.session_state.prolific_id,
+        "timestamp": firestore.SERVER_TIMESTAMP,
+        "responses": db_prev + all_responses
+    })
+    st.session_state.submitted_all = True
+    df = pd.DataFrame(all_responses)
+    st.success("Survey complete. Thank you!")
         # st.dataframe(df)
 
         # CSV download
