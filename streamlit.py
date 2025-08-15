@@ -202,7 +202,7 @@ with st.form("all_images_form"):
         # else:
         q6 = questions[2]["out_q"]
         options = questions[2]["options"]
-        ans_bg1 = st.multiselect(q6, options, key=f"q4_{idx}")
+        ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
         response["q6"] = ans_bg1
         # if indoor_flag == 'Choose an option':
         #     incomplete = True
