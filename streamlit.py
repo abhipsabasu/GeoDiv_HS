@@ -183,15 +183,15 @@ with st.form("all_images_form"):
         # Question 2
         # with col1b:
         q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
-        bg_visible = st.radio(q2, ['Yes', 'No'], key=f"q2_{idx}")
+        bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}")
         response["q2"] =  bg_visible
-        if not bg_visible:
+        if bg_visible == 'Choose an option':
             incomplete = True
             missing_questions.append(f"Image {idx + 1} - Q2")
         st.write(bg_visible)
         if bg_visible == 'Yes':
             q3 = "Is the image indoor or outdoor?"
-            indoor_flag = st.radio(q3, ['Indoor', 'Outdoor'], key=f"q3_{idx}", index=None)
+            indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
             response["q3"] = indoor_flag
             if indoor_flag == 'Indoor':
                 q4 = questions[1]["ind_q"]
@@ -199,7 +199,7 @@ with st.form("all_images_form"):
             else:
                 q4 = questions[2]["out_q"]
                 options = questions[2]["options"]
-            if not indoor_flag:
+            if indoor_flag == 'Choose an option':
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q3")
             ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
