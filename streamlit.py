@@ -79,6 +79,7 @@ Answer **ALL** questions.
 
 db_name = "GeoDiv_VDI_Assessment"
 
+@st.cache_data
 def collate_info(db_name, prolific_id):
     # Fetch responses
     docs = db.collection(db_name).stream()
@@ -116,6 +117,9 @@ def collate_info(db_name, prolific_id):
 
     return all_rows, db_len
 
+if "db_len" not in st.session_state:
+    st.session_state.db_len = 0
+
 if "prolific_id" not in st.session_state:
     st.session_state.prolific_id = None
 
@@ -133,8 +137,10 @@ if not st.session_state.prolific_id:
                 st.error("Please enter a valid Prolific ID.")
     st.stop()  # Stop further execution until ID is entered
 
+
 db_prev, db_len = collate_info(db_name, st.session_state.prolific_id)
 
+st.session_state.db_len = db_len
 
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
