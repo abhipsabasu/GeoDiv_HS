@@ -205,12 +205,12 @@ with st.form("all_images_form"):
         indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
         response["q3"] = indoor_flag
         # if indoor_flag == 'Indoor':
-        q4 = questions[1]["ind_q"]
+        q4 = "**Indoor qn:** " + questions[1]["ind_q"]
         options = questions[1]["options"]
         ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
         response["q4"] = ans_bg
         # else:
-        q6 = questions[2]["out_q"]
+        q6 = "**Outdoor qn:** " + questions[2]["out_q"]
         options = questions[2]["options"]
         ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
         response["q6"] = ans_bg1
