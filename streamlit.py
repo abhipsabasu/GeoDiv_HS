@@ -183,7 +183,7 @@ with st.form("all_images_form"):
         # Question 2
         # with col1b:
         q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
-        bg_visible = st.radio(q2, ['Yes', 'No'], key=f"q2_{idx}", index=None)
+        bg_visible = st.radio(q2, ['Yes', 'No'], key=f"q2_{idx}")
         response["q2"] =  bg_visible
         if not bg_visible:
             incomplete = True
