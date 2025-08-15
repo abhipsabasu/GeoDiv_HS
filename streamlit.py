@@ -88,12 +88,12 @@ def collate_info(db_name, prolific_id):
     # df.to_csv(f"vdi_2.csv", index=False)
     # print("Downloaded to image_geolocalization_hs.csv")
     if len(df) == 0:
-        return []
+        return [], 0
     df['responses'] = df['responses'].astype(str)
     df['responses'] = df['responses'].apply(ast.literal_eval)
     df = df[df['prolific_id'] == prolific_id]
     if len(df) == 0:
-        return []
+        return [], 0
     row = df.iloc[0].to_dict()['responses']
     print(len(row))
     all_rows = []
