@@ -173,7 +173,7 @@ with st.form("all_images_form"):
         # Question 1
         # with col1a:
         q1 = questions[0]
-        ans1 = st.multiselect(q1["entity_q"], q1["options"], key=f"q1_{idx}_{uuid.uuid4()}")
+        ans1 = st.multiselect(q1["entity_q"], q1["options"], key=f"q1_{idx}")
         response["q1"] = ans1
         if not ans1:
             incomplete = True
@@ -184,7 +184,7 @@ with st.form("all_images_form"):
         # Question 2
         # with col1b:
         q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
-        bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}_{uuid.uuid4()}", index=0)
+        bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}")
         response["q2"] =  bg_visible
         if bg_visible == 'Choose an option':
             incomplete = True
@@ -192,7 +192,7 @@ with st.form("all_images_form"):
         st.write(bg_visible)
         if bg_visible == 'Yes':
             q3 = "Is the image indoor or outdoor?"
-            indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}_{uuid.uuid4()}", index=0)
+            indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
             response["q3"] = indoor_flag
             if indoor_flag == 'Indoor':
                 q4 = questions[1]["ind_q"]
@@ -203,7 +203,7 @@ with st.form("all_images_form"):
             if indoor_flag == 'Choose an option':
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q3")
-            ans_bg = st.multiselect(q4, options, key=f"q4_{idx}_{uuid.uuid4()}")
+            ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
             response["q4"] = ans_bg
             if not ans_bg:
                 incomplete = True
@@ -211,7 +211,8 @@ with st.form("all_images_form"):
 
         q5 = {"question": "**Rate your confidence in answering the questions.**",
                 "options": ["High confidence", "Medium confidence", "Low confidence"]}
-        ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}_{uuid.uuid4()}")
+        ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}")
+        st.write(ans5)
         if not ans5:
             incomplete = True
             missing_questions.append(f"Image {idx + 1} - Q5")
