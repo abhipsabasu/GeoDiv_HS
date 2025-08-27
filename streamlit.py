@@ -98,46 +98,50 @@ if not st.session_state.prolific_id:
                 st.error("Please enter a valid Prolific ID.")
     st.stop()  # Stop further execution until ID is entered
 
-# Load completed concepts and survey status from Firestore now that we have prolific_id
-if st.session_state.prolific_id and (not st.session_state.completed_concepts or not st.session_state.survey_complete):
+# Step-by-step database check and concept loading
+if st.session_state.prolific_id:
     try:
+        # Step a) Check if there is an entry for the given prolific_id in the db
         doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
         existing_doc = doc_ref.get()
-        if existing_doc.exists:
+        
+        if not existing_doc.exists:
+            # No entry exists - load as usual (first time user)
+            st.info("**Welcome! This is your first time taking the survey.**")
+            st.session_state.completed_concepts = []
+            st.session_state.survey_complete = False
+        else:
+            # Entry exists - load existing data
             existing_data = existing_doc.to_dict()
-            # Load completed concepts
-            if not st.session_state.completed_concepts:
-                stored_completed_concepts = existing_data.get('completed_concepts', [])
-                st.session_state.completed_concepts = stored_completed_concepts
-            # Load survey completion status
-            if not st.session_state.survey_complete:
-                st.session_state.survey_complete = existing_data.get('survey_complete', False)
-    except:
-        pass
+            stored_completed_concepts = existing_data.get('completed_concepts', [])
+            st.session_state.completed_concepts = stored_completed_concepts
+            st.session_state.survey_complete = existing_data.get('survey_complete', False)
+            
+            # Step b) Check what concepts are present within the entry
+            total_concepts = len(unique_concepts)
+            completed_count = len(st.session_state.completed_concepts)
+            
+            if completed_count >= total_concepts:
+                # All concepts covered - exit the survey
+                st.success("🎉 Congratulations! You have completed all available concepts!")
+                st.write("**All concepts have been completed. Thank you for participating in the survey!**")
+                st.stop()
+            else:
+                # Not all concepts covered - show remaining ones
+                st.info(f"**Welcome back! You have completed {completed_count}/{total_concepts} concepts.**")
+                st.info(f"**{total_concepts - completed_count} concept(s) remaining.**")
+                st.info("**You can continue with the remaining concepts below.**")
+                
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
+        st.session_state.completed_concepts = []
+        st.session_state.survey_complete = False
 
-# Recalculate available concepts after loading completed ones
+# Calculate available concepts (excluding completed ones)
 available_concepts = [concept for concept in unique_concepts if concept not in st.session_state.completed_concepts]
 
+# Only show concept selection if no concept is currently selected
 if not st.session_state.selected_concept:
-    # Check if survey is already complete
-    if st.session_state.prolific_id:
-        try:
-            doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
-            existing_doc = doc_ref.get()
-            if existing_doc.exists:
-                existing_data = existing_doc.to_dict()
-                if existing_data.get('survey_complete', False):
-                    st.success("🎉 You have already completed the entire survey!")
-                    st.write("**Thank you for participating in our study. Your responses have been recorded.**")
-                    st.stop()
-        except:
-            pass
-    
-    if len(available_concepts) == 0:
-        st.success("🎉 Congratulations! You have completed all available concepts!")
-        st.write("**All concepts have been completed. Thank you for participating in the survey!**")
-        st.stop()
-    
     st.write("## Please select a concept to begin:")
     
     # Progress indicator
@@ -183,11 +187,7 @@ if not st.session_state.selected_concept:
     
     st.stop()
 
-# Check if survey is already complete
-if st.session_state.survey_complete:
-    st.success("🎉 You have already completed the entire survey!")
-    st.write("**Thank you for participating in our study. Your responses have been recorded.**")
-    st.stop()
+
 
 # Handle review mode for completed concepts
 if st.session_state.review_mode:
