@@ -69,6 +69,15 @@ if "completed_concepts" not in st.session_state:
 if "prolific_id" not in st.session_state:
     st.session_state.prolific_id = None
 
+if "survey_complete" not in st.session_state:
+    st.session_state.survey_complete = False
+
+if "review_mode" not in st.session_state:
+    st.session_state.review_mode = False
+
+if "submitted_all" not in st.session_state:
+    st.session_state.submitted_all = False
+
 # Get available concepts (excluding completed ones)
 available_concepts = [concept for concept in unique_concepts if concept not in st.session_state.completed_concepts]
 
@@ -87,15 +96,20 @@ if not st.session_state.prolific_id:
                 st.error("Please enter a valid Prolific ID.")
     st.stop()  # Stop further execution until ID is entered
 
-# Load completed concepts from Firestore now that we have prolific_id
-if st.session_state.prolific_id and not st.session_state.completed_concepts:
+# Load completed concepts and survey status from Firestore now that we have prolific_id
+if st.session_state.prolific_id and (not st.session_state.completed_concepts or not st.session_state.survey_complete):
     try:
         doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
         existing_doc = doc_ref.get()
         if existing_doc.exists:
             existing_data = existing_doc.to_dict()
-            stored_completed_concepts = existing_data.get('completed_concepts', [])
-            st.session_state.completed_concepts = stored_completed_concepts
+            # Load completed concepts
+            if not st.session_state.completed_concepts:
+                stored_completed_concepts = existing_data.get('completed_concepts', [])
+                st.session_state.completed_concepts = stored_completed_concepts
+            # Load survey completion status
+            if not st.session_state.survey_complete:
+                st.session_state.survey_complete = existing_data.get('survey_complete', False)
     except:
         pass
 
@@ -400,12 +414,6 @@ st.session_state.db_len = db_len
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
     st.session_state.submitted_all = False
-
-if "survey_complete" not in st.session_state:
-    st.session_state.survey_complete = False
-
-if "review_mode" not in st.session_state:
-    st.session_state.review_mode = False
 
 # Only show the main survey form if we have a selected concept
 if st.session_state.selected_concept:
