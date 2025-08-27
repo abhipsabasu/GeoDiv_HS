@@ -450,6 +450,16 @@ if st.session_state.selected_concept:
 
             questions = QUESTIONS.get(img_name, [])
             response = {"image": img_name, "q1": None, "q2": None, "q3": None, "q4": None, "q5": None, "q6": None}
+            
+            # Debug: Show questions structure
+            st.write(f"**Debug: Questions for {img_name}:**")
+            st.write(f"**Questions length: {len(questions)}**")
+            if len(questions) > 0:
+                st.write(f"**Q1 structure: {questions[0] if questions[0] else 'None'}**")
+                if len(questions) > 1:
+                    st.write(f"**Q2 structure: {questions[1] if questions[1] else 'None'}**")
+                if len(questions) > 2:
+                    st.write(f"**Q3 structure: {questions[2] if questions[2] else 'None'}**")
 
             # Layout with 2 columns
             # if len(questions) == 4:
@@ -474,17 +484,29 @@ if st.session_state.selected_concept:
             q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
             bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}")
             response["q2"] =  bg_visible
+            
+            # Debug: Show what was selected
+            st.write(f"**Debug: Background visibility selected: '{bg_visible}'**")
+            
             if bg_visible == 'Choose an option':
                 incomplete = True
                 missing_questions.append(f"Image {idx + 1} - Q2")
             
+            # Add a rerun button to ensure form updates
+            if bg_visible in ['Yes', 'No']:
+                if st.button(f"Update form for Image {idx + 1}", key=f"update_{idx}"):
+                    st.rerun()
+            
             # Only show q3, q4, and q6 if background is visible (q2 = 'Yes')
             if bg_visible == 'Yes':
+                st.write(f"**Background is visible - showing additional questions**")
+                
                 q3 = "Is the image indoor or outdoor?"
                 indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
                 response["q3"] = indoor_flag
                 
                 if indoor_flag == 'Indoor':
+                    st.write("**Indoor setting detected**")
                     q4 = "**Indoor qn:** " + questions[1]["ind_q"]
                     options = questions[1]["options"] + ["None of the above"]
                     ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
@@ -495,6 +517,7 @@ if st.session_state.selected_concept:
                         missing_questions.append(f"Image {idx + 1} - Q4")
                         
                 elif indoor_flag == 'Outdoor':
+                    st.write("**Outdoor setting detected**")
                     q6 = "**Outdoor qn:** " + questions[2]["out_q"]
                     options = questions[2]["options"] + ["None of the above"]
                     ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
@@ -509,6 +532,7 @@ if st.session_state.selected_concept:
                     missing_questions.append(f"Image {idx + 1} - Q3")
             else:
                 # If background is not visible, set these to None
+                st.write(f"**Background not visible - skipping additional questions**")
                 response["q3"] = None
                 response["q4"] = None
                 response["q6"] = None
