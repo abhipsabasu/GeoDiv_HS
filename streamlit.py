@@ -59,14 +59,35 @@ unique_concepts = sorted(df['concept'].str.split('_').str[0].unique())
 # --- UI HEADER ---
 st.title("A Study on Image-based Question Answering")
 
-# Concept Selection
+# Initialize session state variables
 if "selected_concept" not in st.session_state:
     st.session_state.selected_concept = None
 
 if "completed_concepts" not in st.session_state:
     st.session_state.completed_concepts = []
 
-# Load completed concepts from Firestore if prolific_id exists
+if "prolific_id" not in st.session_state:
+    st.session_state.prolific_id = None
+
+# Get available concepts (excluding completed ones)
+available_concepts = [concept for concept in unique_concepts if concept not in st.session_state.completed_concepts]
+
+# Check if Prolific ID is provided first
+if not st.session_state.prolific_id:
+    with st.form("prolific_form"):
+        st.write("## Please enter your Prolific ID to begin:")
+        pid = st.text_input("Prolific ID", max_chars=24)
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            if pid.strip():
+                st.session_state.prolific_id = pid.strip()
+                st.success("Thank you! You may now begin the survey.")
+                st.rerun()
+            else:
+                st.error("Please enter a valid Prolific ID.")
+    st.stop()  # Stop further execution until ID is entered
+
+# Load completed concepts from Firestore now that we have prolific_id
 if st.session_state.prolific_id and not st.session_state.completed_concepts:
     try:
         doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
@@ -78,7 +99,7 @@ if st.session_state.prolific_id and not st.session_state.completed_concepts:
     except:
         pass
 
-# Get available concepts (excluding completed ones)
+# Recalculate available concepts after loading completed ones
 available_concepts = [concept for concept in unique_concepts if concept not in st.session_state.completed_concepts]
 
 if not st.session_state.selected_concept:
@@ -365,25 +386,14 @@ def collate_info(db_name, prolific_id, concept=None):
 if "db_len" not in st.session_state:
     st.session_state.db_len = 0
 
-if "prolific_id" not in st.session_state:
-    st.session_state.prolific_id = None
-
-if not st.session_state.prolific_id:
-    with st.form("prolific_form"):
-        st.write(f"## Please enter your Prolific ID to begin the survey for concept: **{st.session_state.selected_concept}**")
-        pid = st.text_input("Prolific ID", max_chars=24)
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            if pid.strip():
-                st.session_state.prolific_id = pid.strip()
-                st.success("Thank you! You may now begin the survey.")
-                st.rerun()
-            else:
-                st.error("Please enter a valid Prolific ID.")
-    st.stop()  # Stop further execution until ID is entered
 
 
-db_prev, db_len = collate_info(db_name, st.session_state.prolific_id, st.session_state.selected_concept)
+
+# Only call collate_info if we have both prolific_id and selected concept
+if st.session_state.prolific_id and st.session_state.selected_concept:
+    db_prev, db_len = collate_info(db_name, st.session_state.prolific_id, st.session_state.selected_concept)
+else:
+    db_prev, db_len = [], 0
 
 st.session_state.db_len = db_len
 
@@ -397,8 +407,10 @@ if "survey_complete" not in st.session_state:
 if "review_mode" not in st.session_state:
     st.session_state.review_mode = False
 
-# --- FORM ---
-with st.form("all_images_form"):
+# Only show the main survey form if we have a selected concept
+if st.session_state.selected_concept:
+    # --- FORM ---
+    with st.form("all_images_form"):
     
     # The `all_res` variable is storing the responses provided by the user for each image in the
     # survey. It is a list that contains dictionaries where each dictionary represents the responses
@@ -505,74 +517,94 @@ with st.form("all_images_form"):
     
     with col2:
         submitted_all = st.form_submit_button("Submit All & End Survey")
+    
+    # Store form submission state
+    if submitted_concept or submitted_all:
+        st.session_state.form_submitted = True
+        st.session_state.submitted_concept = submitted_concept
+        st.session_state.submitted_all_survey = submitted_all
+        st.rerun()
 
-# --- HANDLE CONCEPT SUBMISSION ---
-if submitted_concept:
-    # Save responses for this concept to Firestore
-    doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+# Handle form submissions outside the form
+if st.session_state.get('form_submitted', False):
+    submitted_concept = st.session_state.get('submitted_concept', False)
+    submitted_all = st.session_state.get('submitted_all_survey', False)
     
-    # Get existing data
-    existing_doc = doc_ref.get()
-    if existing_doc.exists:
-        existing_data = existing_doc.to_dict()
-        existing_responses = existing_data.get('responses', [])
-        # Add new responses
-        all_responses_combined = existing_responses + all_responses
-    else:
-        all_responses_combined = all_responses
+    # Reset form submission state
+    st.session_state.form_submitted = False
+    st.session_state.submitted_concept = False
+    st.session_state.submitted_all_survey = False
     
-    # Update with new responses
-    doc_ref.set({
-        "prolific_id": st.session_state.prolific_id,
-        "timestamp": firestore.SERVER_TIMESTAMP,
-        "responses": all_responses_combined,
-        "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept]
-    })
-    
-    # Store the concept before resetting it
-    completed_concept = st.session_state.selected_concept
-    
-    # Add completed concept to session state
-    if completed_concept not in st.session_state.completed_concepts:
-        st.session_state.completed_concepts.append(completed_concept)
-    
-    # Reset concept selection for next round
-    st.session_state.selected_concept = None
-    st.session_state.submitted_all = True
-    
-    st.success(f"🎉 Concept '{completed_concept}' completed successfully!")
-    st.write(f"**You have completed {len(st.session_state.completed_concepts)} concept(s) so far.**")
-    st.write("**Please select another concept to continue, or you're done if all concepts are completed.**")
-    
-    # Rerun to show concept selection again
-    st.rerun()
+            # --- HANDLE CONCEPT SUBMISSION ---
+        if submitted_concept:
+            # Save responses for this concept to Firestore
+            doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+            
+            # Get existing data
+            existing_doc = doc_ref.get()
+            if existing_doc.exists:
+                existing_data = existing_doc.to_dict()
+                existing_responses = existing_data.get('responses', [])
+                # Add new responses
+                all_responses_combined = existing_responses + all_responses
+            else:
+                all_responses_combined = all_responses
+            
+            # Update with new responses
+            doc_ref.set({
+                "prolific_id": st.session_state.prolific_id,
+                "timestamp": firestore.SERVER_TIMESTAMP,
+                "responses": all_responses_combined,
+                "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept]
+            })
+            
+            # Store the concept before resetting it
+            completed_concept = st.session_state.selected_concept
+            
+            # Add completed concept to session state
+            if completed_concept not in st.session_state.completed_concepts:
+                st.session_state.completed_concepts.append(completed_concept)
+            
+            # Reset concept selection for next round
+            st.session_state.selected_concept = None
+            st.session_state.submitted_all = True
+            
+            st.success(f"🎉 Concept '{completed_concept}' completed successfully!")
+            st.write(f"**You have completed {len(st.session_state.completed_concepts)} concept(s) so far.**")
+            st.write("**Please select another concept to continue, or you're done if all concepts are completed.**")
+            
+            # Rerun to show concept selection again
+            st.rerun()
 
-# --- HANDLE FINAL SURVEY SUBMISSION ---
-if submitted_all:
-    # Save all responses and mark survey as complete
-    doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
-    
-    # Get existing data
-    existing_doc = doc_ref.get()
-    if existing_doc.exists:
-        existing_data = existing_doc.to_dict()
-        existing_responses = existing_data.get('responses', [])
-        # Add new responses
-        all_responses_combined = existing_responses + all_responses
-    else:
-        all_responses_combined = all_responses
-    
-    # Mark survey as complete
-    doc_ref.set({
-        "prolific_id": st.session_state.prolific_id,
-        "timestamp": firestore.SERVER_TIMESTAMP,
-        "responses": all_responses_combined,
-        "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept],
-        "survey_complete": True,
-        "completion_timestamp": firestore.SERVER_TIMESTAMP
-    })
-    
-    st.session_state.survey_complete = True
-    st.success("🎉 Congratulations! You have completed the entire survey!")
-    st.write("**Thank you for participating in our study. Your responses have been recorded.**")
-    st.stop()
+        # --- HANDLE FINAL SURVEY SUBMISSION ---
+        if submitted_all:
+            # Save all responses and mark survey as complete
+            doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+            
+            # Get existing data
+            existing_doc = doc_ref.get()
+            if existing_doc.exists:
+                existing_data = existing_doc.to_dict()
+                existing_responses = existing_data.get('responses', [])
+                # Add new responses
+                all_responses_combined = existing_responses + all_responses
+            else:
+                all_responses_combined = all_responses
+            
+            # Mark survey as complete
+            doc_ref.set({
+                "prolific_id": st.session_state.prolific_id,
+                "timestamp": firestore.SERVER_TIMESTAMP,
+                "responses": all_responses_combined,
+                "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept],
+                "survey_complete": True,
+                "completion_timestamp": firestore.SERVER_TIMESTAMP
+            })
+            
+            st.session_state.survey_complete = True
+            st.success("🎉 Congratulations! You have completed the entire survey!")
+            st.write("**Thank you for participating in our study. Your responses have been recorded.**")
+            st.stop()
+else:
+    # If no concept is selected, show a message
+    st.info("Please select a concept from the concept selection screen to begin the survey.")
