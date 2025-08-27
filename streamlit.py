@@ -301,11 +301,11 @@ QUESTIONS = {}
 
 for idx, row in df_filtered.iterrows():
     QUESTIONS[row['img_path']] = [{"entity_q": row['question']+'**', 
-                                    "options": ['The enquired entity attribute is not visible in the image'] + row['attribute_values']},
+                                    "options": row['attribute_values']},
                                   {"ind_q": '**'+row['ind_question']+'**', 
-                                    "options": ['The enquired background attribute is not visible in the image'] + row['ind_attribute_values']},
+                                    "options": row['ind_attribute_values']},
                                   {"out_q": '**'+row['out_question']+'**', 
-                                    "options": ['The enquired background attribute is not visible in the image'] + row['out_attribute_values']}]
+                                    "options": row['out_attribute_values']}]
 
 st.write(f"**Selected Concept: {st.session_state.selected_concept}**")
 st.write(f"**Total images for this concept: {len(IMAGE_LIST)}**")
@@ -462,6 +462,9 @@ if st.session_state.selected_concept:
         # with col1a:
         st.markdown(f"**The primary entity depicted in the image is {entity}**")
         q1 = questions[0]
+        options = q1["options"] + ["None of the above"]
+        if 'yes' not in options:
+            options = options + ['The enquired entity attribute is not visible in the image']
         ans1 = st.multiselect(q1["entity_q"], q1["options"] + ["None of the above"], key=f"q1_{idx}")
         response["q1"] = ans1
         if not ans1:
@@ -494,6 +497,8 @@ if st.session_state.selected_concept:
 
                 q4 = "**Indoor qn:** " + questions[1]["ind_q"]
                 options = questions[1]["options"] + ["None of the above"]
+                if 'yes' not in options:
+                    options = options + ['The enquired background attribute is not visible in the image']
                 ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
                 response["q4"] = ans_bg
                 
@@ -505,6 +510,8 @@ if st.session_state.selected_concept:
 
                 q6 = "**Outdoor qn:** " + questions[2]["out_q"]
                 options = questions[2]["options"] + ["None of the above"]
+                if 'yes' not in options:
+                    options = options + ['The enquired background attribute is not visible in the image']
                 ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
                 response["q6"] = ans_bg1
                 
