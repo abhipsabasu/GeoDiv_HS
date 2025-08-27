@@ -309,42 +309,9 @@ for idx, row in df_filtered.iterrows():
 
 st.write(f"**Selected Concept: {st.session_state.selected_concept}**")
 st.write(f"**Total images for this concept: {len(IMAGE_LIST)}**")
-st.write(f"**Images completed: {db_len}**")
-st.write(f"**Images remaining: {len(IMAGE_LIST) - db_len}**")
 
-# Progress bar for current concept
-if len(IMAGE_LIST) > 0:
-    st.progress(db_len / len(IMAGE_LIST))
-
-# Add option to change concept
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("Change Concept"):
-        st.session_state.selected_concept = None
-        st.rerun()
-
-with col2:
-    if st.button("← Back to Concept Selection"):
-        st.session_state.selected_concept = None
-        st.rerun()
-
-st.write("""You will be shown a number of images, and each such image will be accompanied by **FIVE questions**. The first question will be about the **primary entity** depicted in the image. The second, third and fourth questions will be about the background of the image, excluding the primary entity. The last question will ask you to rate your confidence in answering the questions.
-Answer **ALL** questions.  
-**Total time: 45 minutes**
-
-### Instructions:
-
-1. See the image very carefully before answering a question.  
-2. Each question will be associated with options. 
-3. **Multiple options can be correct for the first three questions.**  
-4. If you do not feel any of the options is correct, select **None of the above**.
-
-### Survey Features:
-
-- **Resume Functionality**: If you exit midway through a concept, you can resume from where you left off
-- **Concept-by-Concept Submission**: Submit each concept individually or submit all at once
-- **Progress Tracking**: See your progress across all concepts and within each concept
-""")
+# Note: Progress details will be shown after loading user data
+st.write("**Loading your progress...**")
 
 db_name = "GeoDiv_VDI_Assessment"
 
@@ -410,6 +377,45 @@ else:
     db_prev, db_len = [], 0
 
 st.session_state.db_len = db_len
+
+# Display progress information now that db_len is available
+if st.session_state.selected_concept:
+    st.write(f"**Images completed: {db_len}**")
+    st.write(f"**Images remaining: {len(IMAGE_LIST) - db_len}**")
+    
+    # Progress bar for current concept
+    if len(IMAGE_LIST) > 0:
+        st.progress(db_len / len(IMAGE_LIST))
+    
+    # Add option to change concept
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Change Concept"):
+            st.session_state.selected_concept = None
+            st.rerun()
+    
+    with col2:
+        if st.button("← Back to Concept Selection"):
+            st.session_state.selected_concept = None
+            st.rerun()
+    
+    st.write("""You will be shown a number of images, and each such image will be accompanied by **FIVE questions**. The first question will be about the **primary entity** depicted in the image. The second, third and fourth questions will be about the background of the image, excluding the primary entity. The last question will ask you to rate your confidence in answering the questions.
+Answer **ALL** questions.  
+**Total time: 45 minutes**
+
+### Instructions:
+
+1. See the image very carefully before answering a question.  
+2. Each question will be associated with options. 
+3. **Multiple options can be correct for the first three questions.**  
+4. If you do not feel any of the options is correct, select **None of the above**.
+
+### Survey Features:
+
+- **Resume Functionality**: If you exit midway through a concept, you can resume from where you left off
+- **Concept-by-Concept Submission**: Submit each concept individually or submit all at once
+- **Progress Tracking**: See your progress across all concepts and within each concept
+""")
 
 # --- SESSION STATE ---
 if "submitted_all" not in st.session_state:
