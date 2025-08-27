@@ -411,119 +411,119 @@ if "review_mode" not in st.session_state:
 if st.session_state.selected_concept:
     # --- FORM ---
     with st.form("all_images_form"):
-    
-    # The `all_res` variable is storing the responses provided by the user for each image in the
-    # survey. It is a list that contains dictionaries where each dictionary represents the responses
-    # for a particular image. Each dictionary includes the image name, the answers to the questions
-    # associated with that image, the confidence rating in answering the questions, and the rating
-    # given to the image on its realism.
-    all_responses = []
-    missing_questions = []
-    # Flag to check if any question was left unanswered
-    for idx, img_name in enumerate(IMAGE_LIST[db_len:]):
-        incomplete = False
-        st.markdown(f"### Image {idx + 1}")
-        entity = df_filtered.iloc[idx]['concept'].split("_")[0]    
-        # Load and display image
-        img_url = GITHUB + img_name
-        try:
-            img_data = requests.get(img_url).content
-            image = Image.open(BytesIO(img_data))
-            st.image(image, use_container_width=True)
-        except:
-            st.error("Could not load image.")
-            continue
-
-        questions = QUESTIONS.get(img_name, [])
-        response = {"image": img_name, "q1": None, "q2": None, "q3": None, "q4": None, "q5": None, "q6": None}
-
-        # Layout with 2 columns
-        # if len(questions) == 4:
-        # col1a, col1b = st.columns(2)
-        # else:
-            # col1 = col2 = st
-
-        # Question 1
-        # with col1a:
-        st.markdown(f"**The primary entity depicted in the image is {entity}**")
-        q1 = questions[0]
-        ans1 = st.multiselect(q1["entity_q"], q1["options"] + ["None of the above"], key=f"q1_{idx}")
-        response["q1"] = ans1
-        if not ans1:
-            incomplete = True
-            missing_questions.append(f"Image {idx + 1} - Q1")
-            # if "None of the above" in ans1:
-            #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
-            #     response[f"{q1['question']} - Other"] = other1
-        # Question 2
-        # with col1b:
-        q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
-        bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}")
-        response["q2"] =  bg_visible
-        if bg_visible == 'Choose an option':
-            incomplete = True
-            missing_questions.append(f"Image {idx + 1} - Q2")
         
-        # Only show q3, q4, and q6 if background is visible (q2 = 'Yes')
-        if bg_visible == 'Yes':
-            q3 = "Is the image indoor or outdoor?"
-            indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
-            response["q3"] = indoor_flag
-            
-            if indoor_flag == 'Indoor':
-                q4 = "**Indoor qn:** " + questions[1]["ind_q"]
-                options = questions[1]["options"] + ["None of the above"]
-                ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
-                response["q4"] = ans_bg
-                
-                if not ans_bg:
-                    incomplete = True
-                    missing_questions.append(f"Image {idx + 1} - Q4")
-                    
-            elif indoor_flag == 'Outdoor':
-                q6 = "**Outdoor qn:** " + questions[2]["out_q"]
-                options = questions[2]["options"] + ["None of the above"]
-                ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
-                response["q6"] = ans_bg1
-                
-                if not ans_bg1:
-                    incomplete = True
-                    missing_questions.append(f"Image {idx + 1} - Q6")
-                    
-            elif indoor_flag == 'Choose an option':
+        # The `all_res` variable is storing the responses provided by the user for each image in the
+        # survey. It is a list that contains dictionaries where each dictionary represents the responses
+        # for a particular image. Each dictionary includes the image name, the answers to the questions
+        # associated with that image, the confidence rating in answering the questions, and the rating
+        # given to the image on its realism.
+        all_responses = []
+        missing_questions = []
+        # Flag to check if any question was left unanswered
+        for idx, img_name in enumerate(IMAGE_LIST[db_len:]):
+            incomplete = False
+            st.markdown(f"### Image {idx + 1}")
+            entity = df_filtered.iloc[idx]['concept'].split("_")[0]    
+            # Load and display image
+            img_url = GITHUB + img_name
+            try:
+                img_data = requests.get(img_url).content
+                image = Image.open(BytesIO(img_data))
+                st.image(image, use_container_width=True)
+            except:
+                st.error("Could not load image.")
+                continue
+
+            questions = QUESTIONS.get(img_name, [])
+            response = {"image": img_name, "q1": None, "q2": None, "q3": None, "q4": None, "q5": None, "q6": None}
+
+            # Layout with 2 columns
+            # if len(questions) == 4:
+            # col1a, col1b = st.columns(2)
+            # else:
+                # col1 = col2 = st
+
+            # Question 1
+            # with col1a:
+            st.markdown(f"**The primary entity depicted in the image is {entity}**")
+            q1 = questions[0]
+            ans1 = st.multiselect(q1["entity_q"], q1["options"] + ["None of the above"], key=f"q1_{idx}")
+            response["q1"] = ans1
+            if not ans1:
                 incomplete = True
-                missing_questions.append(f"Image {idx + 1} - Q3")
-        else:
-            # If background is not visible, set these to None
-            response["q3"] = None
-            response["q4"] = None
-            response["q6"] = None
+                missing_questions.append(f"Image {idx + 1} - Q1")
+                # if "None of the above" in ans1:
+                #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
+                #     response[f"{q1['question']} - Other"] = other1
+            # Question 2
+            # with col1b:
+            q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
+            bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}")
+            response["q2"] =  bg_visible
+            if bg_visible == 'Choose an option':
+                incomplete = True
+                missing_questions.append(f"Image {idx + 1} - Q2")
+            
+            # Only show q3, q4, and q6 if background is visible (q2 = 'Yes')
+            if bg_visible == 'Yes':
+                q3 = "Is the image indoor or outdoor?"
+                indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
+                response["q3"] = indoor_flag
+                
+                if indoor_flag == 'Indoor':
+                    q4 = "**Indoor qn:** " + questions[1]["ind_q"]
+                    options = questions[1]["options"] + ["None of the above"]
+                    ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
+                    response["q4"] = ans_bg
+                    
+                    if not ans_bg:
+                        incomplete = True
+                        missing_questions.append(f"Image {idx + 1} - Q4")
+                        
+                elif indoor_flag == 'Outdoor':
+                    q6 = "**Outdoor qn:** " + questions[2]["out_q"]
+                    options = questions[2]["options"] + ["None of the above"]
+                    ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
+                    response["q6"] = ans_bg1
+                    
+                    if not ans_bg1:
+                        incomplete = True
+                        missing_questions.append(f"Image {idx + 1} - Q6")
+                        
+                elif indoor_flag == 'Choose an option':
+                    incomplete = True
+                    missing_questions.append(f"Image {idx + 1} - Q3")
+            else:
+                # If background is not visible, set these to None
+                response["q3"] = None
+                response["q4"] = None
+                response["q6"] = None
 
-        q5 = {"question": "**Rate your confidence in answering the questions.**",
-                "options": ["High confidence", "Medium confidence", "Low confidence"]}
-        ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}")
-        if not ans5:
-            incomplete = True
-            missing_questions.append(f"Image {idx + 1} - Q5")
-        response["q5"] = ans5
-        all_responses.append(response)
-        st.markdown("---")
+            q5 = {"question": "**Rate your confidence in answering the questions.**",
+                    "options": ["High confidence", "Medium confidence", "Low confidence"]}
+            ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}")
+            if not ans5:
+                incomplete = True
+                missing_questions.append(f"Image {idx + 1} - Q5")
+            response["q5"] = ans5
+            all_responses.append(response)
+            st.markdown("---")
 
-    # Two columns for buttons
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        submitted_concept = st.form_submit_button(f"Submit Concept: {st.session_state.selected_concept}")
-    
-    with col2:
-        submitted_all = st.form_submit_button("Submit All & End Survey")
-    
-    # Store form submission state
-    if submitted_concept or submitted_all:
-        st.session_state.form_submitted = True
-        st.session_state.submitted_concept = submitted_concept
-        st.session_state.submitted_all_survey = submitted_all
-        st.rerun()
+        # Two columns for buttons
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            submitted_concept = st.form_submit_button(f"Submit Concept: {st.session_state.selected_concept}")
+        
+        with col2:
+            submitted_all = st.form_submit_button("Submit All & End Survey")
+        
+        # Store form submission state
+        if submitted_concept or submitted_all:
+            st.session_state.form_submitted = True
+            st.session_state.submitted_concept = submitted_concept
+            st.session_state.submitted_all_survey = submitted_all
+            st.rerun()
 
 # Handle form submissions outside the form
 if st.session_state.get('form_submitted', False):
@@ -535,76 +535,76 @@ if st.session_state.get('form_submitted', False):
     st.session_state.submitted_concept = False
     st.session_state.submitted_all_survey = False
     
-            # --- HANDLE CONCEPT SUBMISSION ---
-        if submitted_concept:
-            # Save responses for this concept to Firestore
-            doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
-            
-            # Get existing data
-            existing_doc = doc_ref.get()
-            if existing_doc.exists:
-                existing_data = existing_doc.to_dict()
-                existing_responses = existing_data.get('responses', [])
-                # Add new responses
-                all_responses_combined = existing_responses + all_responses
-            else:
-                all_responses_combined = all_responses
-            
-            # Update with new responses
-            doc_ref.set({
-                "prolific_id": st.session_state.prolific_id,
-                "timestamp": firestore.SERVER_TIMESTAMP,
-                "responses": all_responses_combined,
-                "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept]
-            })
-            
-            # Store the concept before resetting it
-            completed_concept = st.session_state.selected_concept
-            
-            # Add completed concept to session state
-            if completed_concept not in st.session_state.completed_concepts:
-                st.session_state.completed_concepts.append(completed_concept)
-            
-            # Reset concept selection for next round
-            st.session_state.selected_concept = None
-            st.session_state.submitted_all = True
-            
-            st.success(f"🎉 Concept '{completed_concept}' completed successfully!")
-            st.write(f"**You have completed {len(st.session_state.completed_concepts)} concept(s) so far.**")
-            st.write("**Please select another concept to continue, or you're done if all concepts are completed.**")
-            
-            # Rerun to show concept selection again
-            st.rerun()
+    # --- HANDLE CONCEPT SUBMISSION ---
+    if submitted_concept:
+        # Save responses for this concept to Firestore
+        doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+        
+        # Get existing data
+        existing_doc = doc_ref.get()
+        if existing_doc.exists:
+            existing_data = existing_doc.to_dict()
+            existing_responses = existing_data.get('responses', [])
+            # Add new responses
+            all_responses_combined = existing_responses + all_responses
+        else:
+            all_responses_combined = all_responses
+        
+        # Update with new responses
+        doc_ref.set({
+            "prolific_id": st.session_state.prolific_id,
+            "timestamp": firestore.SERVER_TIMESTAMP,
+            "responses": all_responses_combined,
+            "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept]
+        })
+        
+        # Store the concept before resetting it
+        completed_concept = st.session_state.selected_concept
+        
+        # Add completed concept to session state
+        if completed_concept not in st.session_state.completed_concepts:
+            st.session_state.completed_concepts.append(completed_concept)
+        
+        # Reset concept selection for next round
+        st.session_state.selected_concept = None
+        st.session_state.submitted_all = True
+        
+        st.success(f"🎉 Concept '{completed_concept}' completed successfully!")
+        st.write(f"**You have completed {len(st.session_state.completed_concepts)} concept(s) so far.**")
+        st.write("**Please select another concept to continue, or you're done if all concepts are completed.**")
+        
+        # Rerun to show concept selection again
+        st.rerun()
 
-        # --- HANDLE FINAL SURVEY SUBMISSION ---
-        if submitted_all:
-            # Save all responses and mark survey as complete
-            doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
-            
-            # Get existing data
-            existing_doc = doc_ref.get()
-            if existing_doc.exists:
-                existing_data = existing_doc.to_dict()
-                existing_responses = existing_data.get('responses', [])
-                # Add new responses
-                all_responses_combined = existing_responses + all_responses
-            else:
-                all_responses_combined = all_responses
-            
-            # Mark survey as complete
-            doc_ref.set({
-                "prolific_id": st.session_state.prolific_id,
-                "timestamp": firestore.SERVER_TIMESTAMP,
-                "responses": all_responses_combined,
-                "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept],
-                "survey_complete": True,
-                "completion_timestamp": firestore.SERVER_TIMESTAMP
-            })
-            
-            st.session_state.survey_complete = True
-            st.success("🎉 Congratulations! You have completed the entire survey!")
-            st.write("**Thank you for participating in our study. Your responses have been recorded.**")
-            st.stop()
+    # --- HANDLE FINAL SURVEY SUBMISSION ---
+    if submitted_all:
+        # Save all responses and mark survey as complete
+        doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+        
+        # Get existing data
+        existing_doc = doc_ref.get()
+        if existing_doc.exists:
+            existing_data = existing_doc.to_dict()
+            existing_responses = existing_data.get('responses', [])
+            # Add new responses
+            all_responses_combined = existing_responses + all_responses
+        else:
+            all_responses_combined = all_responses
+        
+        # Mark survey as complete
+        doc_ref.set({
+            "prolific_id": st.session_state.prolific_id,
+            "timestamp": firestore.SERVER_TIMESTAMP,
+            "responses": all_responses_combined,
+            "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept],
+            "survey_complete": True,
+            "completion_timestamp": firestore.SERVER_TIMESTAMP
+        })
+        
+        st.session_state.survey_complete = True
+        st.success("🎉 Congratulations! You have completed the entire survey!")
+        st.write("**Thank you for participating in our study. Your responses have been recorded.**")
+        st.stop()
 else:
     # If no concept is selected, show a message
     st.info("Please select a concept from the concept selection screen to begin the survey.")
