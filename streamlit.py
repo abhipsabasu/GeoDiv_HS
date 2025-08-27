@@ -77,6 +77,8 @@ if "review_mode" not in st.session_state:
 
 if "submitted_all" not in st.session_state:
     st.session_state.submitted_all = False
+if "permanently_complete" not in st.session_state:
+    st.session_state.permanently_complete = False
 
 # Get available concepts (excluding completed ones)
 available_concepts = [concept for concept in unique_concepts if concept not in st.session_state.completed_concepts]
@@ -417,9 +419,7 @@ Answer **ALL** questions.
 - **Progress Tracking**: See your progress across all concepts and within each concept
 """)
 
-# --- SESSION STATE ---
-if "submitted_all" not in st.session_state:
-    st.session_state.submitted_all = False
+# --- SURVEY QUESTIONS ---
 
 # Only show the main survey form if we have a selected concept
 if st.session_state.selected_concept:
@@ -545,7 +545,22 @@ if st.session_state.selected_concept:
         submitted_concept = st.button(f"Submit Concept: {st.session_state.selected_concept}")
     
     with col2:
-        submitted_all = st.button("Submit All & End Survey")
+        submitted_all = st.button("Submit All & Take Break")
+    
+    # Show progress
+    total_concepts = len(df['concept'].str.split('_').str[0].unique())
+    remaining_concepts = total_concepts - len(st.session_state.completed_concepts)
+    
+    st.info(f"**Progress: {len(st.session_state.completed_concepts)}/{total_concepts} concepts completed**")
+    if remaining_concepts > 0:
+        st.info(f"**{remaining_concepts} concept(s) remaining**")
+        st.info("**You can submit all and take a break, then return later to continue.**")
+    else:
+        st.success("**🎉 All concepts completed!**")
+        st.info("**You can now complete the survey permanently.**")
+        if st.button("Complete Survey Permanently"):
+            st.session_state.permanently_complete = True
+            st.rerun()
     
     # Store form submission state
     if submitted_concept or submitted_all:
@@ -602,12 +617,28 @@ if st.session_state.get('form_submitted', False):
         st.write(f"**You have completed {len(st.session_state.completed_concepts)} concept(s) so far.**")
         st.write("**Please select another concept to continue, or you're done if all concepts are completed.**")
         
+        # Add option to reset survey if needed
+        if st.button("🔄 Reset Survey (Start Over)"):
+            # Clear completed concepts and survey completion
+            st.session_state.completed_concepts = []
+            st.session_state.survey_complete = False
+            
+            # Clear from Firestore
+            doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+            doc_ref.update({
+                "completed_concepts": [],
+                "survey_complete": False
+            })
+            
+            st.success("Survey reset successfully! You can now start over.")
+            st.rerun()
+        
         # Rerun to show concept selection again
         st.rerun()
 
-    # --- HANDLE FINAL SURVEY SUBMISSION ---
+    # --- HANDLE SUBMIT ALL (TAKE BREAK) ---
     if submitted_all:
-        # Save all responses and mark survey as complete
+        # Save all responses but DON'T mark survey as complete
         doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
         
         # Get existing data
@@ -620,20 +651,37 @@ if st.session_state.get('form_submitted', False):
         else:
             all_responses_combined = all_responses
         
-        # Mark survey as complete
+        # Save progress but keep survey active
         doc_ref.set({
             "prolific_id": st.session_state.prolific_id,
             "timestamp": firestore.SERVER_TIMESTAMP,
             "responses": all_responses_combined,
             "completed_concepts": st.session_state.completed_concepts + [st.session_state.selected_concept],
-            "survey_complete": True,
-            "completion_timestamp": firestore.SERVER_TIMESTAMP
+            "last_break_timestamp": firestore.SERVER_TIMESTAMP
         })
         
-        st.session_state.survey_complete = True
-        st.success("🎉 Congratulations! You have completed the entire survey!")
-        st.write("**Thank you for participating in our study. Your responses have been recorded.**")
-        st.stop()
+        st.success("💾 Progress saved! You can take a break and return later.")
+        st.write(f"**You have completed {len(st.session_state.completed_concepts) + 1} concept(s) so far.**")
+        st.write("**When you return, you can continue with the remaining concepts.**")
+        
+        # Reset concept selection to show concept selection screen
+        st.session_state.selected_concept = None
+        st.rerun()
+
+# Handle permanent survey completion
+if st.session_state.get('permanently_complete', False):
+    # Mark survey as permanently complete
+    doc_ref = db.collection("GeoDiv_VDI_Assessment").document(st.session_state.prolific_id)
+    
+    doc_ref.update({
+        "survey_complete": True,
+        "completion_timestamp": firestore.SERVER_TIMESTAMP
+    })
+    
+    st.session_state.survey_complete = True
+    st.success("🎉 Congratulations! You have completed the entire survey!")
+    st.write("**Thank you for participating in our study. Your responses have been recorded.**")
+    st.stop()
 else:
     # If no concept is selected, show a message
     st.info("Please select a concept from the concept selection screen to begin the survey.")
