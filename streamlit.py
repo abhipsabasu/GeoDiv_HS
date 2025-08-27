@@ -423,145 +423,129 @@ if "submitted_all" not in st.session_state:
 
 # Only show the main survey form if we have a selected concept
 if st.session_state.selected_concept:
-    # --- FORM ---
-    with st.form("all_images_form"):
+    # --- SURVEY QUESTIONS ---
+    
+    # The `all_res` variable is storing the responses provided by the user for each image in the
+    # survey. It is a list that contains dictionaries where each dictionary represents the responses
+    # for a particular image. Each dictionary includes the image name, the answers to the questions
+    # associated with that image, the confidence rating in answering the questions, and the rating
+    # given to the image on its realism.
+    all_responses = []
+    missing_questions = []
+    # Flag to check if any question was left unanswered
+    for idx, img_name in enumerate(IMAGE_LIST[db_len:]):
+        incomplete = False
+        st.markdown(f"### Image {idx + 1}")
+        entity = df_filtered.iloc[idx]['concept'].split("_")[0]    
+        # Load and display image
+        img_url = GITHUB + img_name
+        try:
+            img_data = requests.get(img_url).content
+            image = Image.open(BytesIO(img_data))
+            st.image(image, use_container_width=True)
+        except:
+            st.error("Could not load image.")
+            continue
+
+        questions = QUESTIONS.get(img_name, [])
+        response = {"image": img_name, "q1": None, "q2": None, "q3": None, "q4": None, "q5": None, "q6": None}
         
-        # The `all_res` variable is storing the responses provided by the user for each image in the
-        # survey. It is a list that contains dictionaries where each dictionary represents the responses
-        # for a particular image. Each dictionary includes the image name, the answers to the questions
-        # associated with that image, the confidence rating in answering the questions, and the rating
-        # given to the image on its realism.
-        all_responses = []
-        missing_questions = []
-        # Flag to check if any question was left unanswered
-        for idx, img_name in enumerate(IMAGE_LIST[db_len:]):
-            incomplete = False
-            st.markdown(f"### Image {idx + 1}")
-            entity = df_filtered.iloc[idx]['concept'].split("_")[0]    
-            # Load and display image
-            img_url = GITHUB + img_name
-            try:
-                img_data = requests.get(img_url).content
-                image = Image.open(BytesIO(img_data))
-                st.image(image, use_container_width=True)
-            except:
-                st.error("Could not load image.")
-                continue
 
-            questions = QUESTIONS.get(img_name, [])
-            response = {"image": img_name, "q1": None, "q2": None, "q3": None, "q4": None, "q5": None, "q6": None}
-            
-            # Debug: Show questions structure
-            st.write(f"**Debug: Questions for {img_name}:**")
-            st.write(f"**Questions length: {len(questions)}**")
-            if len(questions) > 0:
-                st.write(f"**Q1 structure: {questions[0] if questions[0] else 'None'}**")
-                if len(questions) > 1:
-                    st.write(f"**Q2 structure: {questions[1] if questions[1] else 'None'}**")
-                if len(questions) > 2:
-                    st.write(f"**Q3 structure: {questions[2] if questions[2] else 'None'}**")
 
-            # Layout with 2 columns
-            # if len(questions) == 4:
-            # col1a, col1b = st.columns(2)
-            # else:
-                # col1 = col2 = st
+        # Layout with 2 columns
+        # if len(questions) == 4:
+        # col1a, col1b = st.columns(2)
+        # else:
+            # col1 = col2 = st
 
-            # Question 1
-            # with col1a:
-            st.markdown(f"**The primary entity depicted in the image is {entity}**")
-            q1 = questions[0]
-            ans1 = st.multiselect(q1["entity_q"], q1["options"] + ["None of the above"], key=f"q1_{idx}")
-            response["q1"] = ans1
-            if not ans1:
-                incomplete = True
-                missing_questions.append(f"Image {idx + 1} - Q1")
-                # if "None of the above" in ans1:
-                #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
-                #     response[f"{q1['question']} - Other"] = other1
-            # Question 2
-            # with col1b:
-            q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
-            bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}")
-            response["q2"] =  bg_visible
+        # Question 1
+        # with col1a:
+        st.markdown(f"**The primary entity depicted in the image is {entity}**")
+        q1 = questions[0]
+        ans1 = st.multiselect(q1["entity_q"], q1["options"] + ["None of the above"], key=f"q1_{idx}")
+        response["q1"] = ans1
+        if not ans1:
+            incomplete = True
+            missing_questions.append(f"Image {idx + 1} - Q1")
+            # if "None of the above" in ans1:
+            #     other1 = st.text_input("Please describe (Q1):", key=f"other1_{idx}")
+            #     response[f"{q1['question']} - Other"] = other1
+        # Question 2
+        # with col1b:
+        q2 = "Is the background of the image (i.e., the part excluding the primary entity) visible?"
+        bg_visible = st.radio(q2, ['Choose an option', 'Yes', 'No'], key=f"q2_{idx}")
+        response["q2"] =  bg_visible
+        
+
+        
+        if bg_visible == 'Choose an option':
+            incomplete = True
+            missing_questions.append(f"Image {idx + 1} - Q2")
+        
+        # Only show q3, q4, and q6 if background is visible (q2 = 'Yes')
+        if bg_visible == 'Yes':
+
             
-            # Debug: Show what was selected
-            st.write(f"**Debug: Background visibility selected: '{bg_visible}'**")
+            q3 = "Is the image indoor or outdoor?"
+            indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
+            response["q3"] = indoor_flag
             
-            if bg_visible == 'Choose an option':
-                incomplete = True
-                missing_questions.append(f"Image {idx + 1} - Q2")
-            
-            # Add a rerun button to ensure form updates
-            if bg_visible in ['Yes', 'No']:
-                if st.button(f"Update form for Image {idx + 1}", key=f"update_{idx}"):
-                    st.rerun()
-            
-            # Only show q3, q4, and q6 if background is visible (q2 = 'Yes')
-            if bg_visible == 'Yes':
-                st.write(f"**Background is visible - showing additional questions**")
+            if indoor_flag == 'Indoor':
+
+                q4 = "**Indoor qn:** " + questions[1]["ind_q"]
+                options = questions[1]["options"] + ["None of the above"]
+                ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
+                response["q4"] = ans_bg
                 
-                q3 = "Is the image indoor or outdoor?"
-                indoor_flag = st.radio(q3, ['Choose an option', 'Indoor', 'Outdoor'], key=f"q3_{idx}")
-                response["q3"] = indoor_flag
-                
-                if indoor_flag == 'Indoor':
-                    st.write("**Indoor setting detected**")
-                    q4 = "**Indoor qn:** " + questions[1]["ind_q"]
-                    options = questions[1]["options"] + ["None of the above"]
-                    ans_bg = st.multiselect(q4, options, key=f"q4_{idx}")
-                    response["q4"] = ans_bg
-                    
-                    if not ans_bg:
-                        incomplete = True
-                        missing_questions.append(f"Image {idx + 1} - Q4")
-                        
-                elif indoor_flag == 'Outdoor':
-                    st.write("**Outdoor setting detected**")
-                    q6 = "**Outdoor qn:** " + questions[2]["out_q"]
-                    options = questions[2]["options"] + ["None of the above"]
-                    ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
-                    response["q6"] = ans_bg1
-                    
-                    if not ans_bg1:
-                        incomplete = True
-                        missing_questions.append(f"Image {idx + 1} - Q6")
-                        
-                elif indoor_flag == 'Choose an option':
+                if not ans_bg:
                     incomplete = True
-                    missing_questions.append(f"Image {idx + 1} - Q3")
-            else:
-                # If background is not visible, set these to None
-                st.write(f"**Background not visible - skipping additional questions**")
-                response["q3"] = None
-                response["q4"] = None
-                response["q6"] = None
+                    missing_questions.append(f"Image {idx + 1} - Q4")
+                    
+            elif indoor_flag == 'Outdoor':
 
-            q5 = {"question": "**Rate your confidence in answering the questions.**",
-                    "options": ["High confidence", "Medium confidence", "Low confidence"]}
-            ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}")
-            if not ans5:
+                q6 = "**Outdoor qn:** " + questions[2]["out_q"]
+                options = questions[2]["options"] + ["None of the above"]
+                ans_bg1 = st.multiselect(q6, options, key=f"q6_{idx}")
+                response["q6"] = ans_bg1
+                
+                if not ans_bg1:
+                    incomplete = True
+                    missing_questions.append(f"Image {idx + 1} - Q6")
+                    
+            elif indoor_flag == 'Choose an option':
                 incomplete = True
-                missing_questions.append(f"Image {idx + 1} - Q5")
-            response["q5"] = ans5
-            all_responses.append(response)
-            st.markdown("---")
+                missing_questions.append(f"Image {idx + 1} - Q3")
+        else:
+            # If background is not visible, set these to None
+            response["q3"] = None
+            response["q4"] = None
+            response["q6"] = None
 
-        # Two columns for buttons
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            submitted_concept = st.form_submit_button(f"Submit Concept: {st.session_state.selected_concept}")
-        
-        with col2:
-            submitted_all = st.form_submit_button("Submit All & End Survey")
-        
-        # Store form submission state
-        if submitted_concept or submitted_all:
-            st.session_state.form_submitted = True
-            st.session_state.submitted_concept = submitted_concept
-            st.session_state.submitted_all_survey = submitted_all
-            st.rerun()
+        q5 = {"question": "**Rate your confidence in answering the questions.**",
+                "options": ["High confidence", "Medium confidence", "Low confidence"]}
+        ans5 = st.radio(q5["question"], q5["options"], key=f"q5_{idx}")
+        if not ans5:
+            incomplete = True
+            missing_questions.append(f"Image {idx + 1} - Q5")
+        response["q5"] = ans5
+        all_responses.append(response)
+        st.markdown("---")
+
+    # Two columns for buttons
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        submitted_concept = st.button(f"Submit Concept: {st.session_state.selected_concept}")
+    
+    with col2:
+        submitted_all = st.button("Submit All & End Survey")
+    
+    # Store form submission state
+    if submitted_concept or submitted_all:
+        st.session_state.form_submitted = True
+        st.session_state.submitted_concept = submitted_concept
+        st.session_state.submitted_all_survey = submitted_all
+        st.rerun()
 
 # Handle form submissions outside the form
 if st.session_state.get('form_submitted', False):
